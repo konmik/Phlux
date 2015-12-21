@@ -79,5 +79,7 @@ The library can potentially fit very well into MVVM but I do not care about data
 
 ### TODO
 
-In some cases we need to call background and UI tasks sequentially.
+- In some cases we need to call background and UI tasks sequentially.
 This is still a pain, so I think about implementing Interactor pattern on top of Phlux.
+
+- 100% test coverage, as usual.
