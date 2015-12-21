@@ -1,7 +1,7 @@
 Phlux
 =======
 
-Phlux is an Android library which helps to architect applications with immutable data in mind.
+Phlux is an Android library which helps to architect applications in a functional way (with immutable data in mind).
 
 It is inspired by Clojure and Facebook's Flux architecture.
 
