@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * An utility class to represent a value that should not be parceled.
+ * An utility class that represents a reference to a value that should not be parceled.
  */
 public class Transient<T> implements Parcelable {
 

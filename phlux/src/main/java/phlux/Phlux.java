@@ -33,21 +33,21 @@ public enum Phlux {
         root = with(root, key, data);
     }
 
-    public <T extends PhluxState> void apply(String key, PhluxFunction<T> action) {
+    public <S extends PhluxState> void apply(String key, PhluxFunction<S> action) {
         ScopeData data = root.get(key);
-        T oldValue = (T) data.state();
-        T newValue = action.call(oldValue);
+        S oldValue = (S) data.state();
+        S newValue = action.call(oldValue);
         root = with(root, key, ScopeData.create(newValue, data.background()));
 
-        BehaviorSubject<T> subject = callbacks.get(key);
+        BehaviorSubject<S> subject = callbacks.get(key);
         if (subject != null)
             subject.onNext(newValue);
     }
 
-    public <T extends PhluxState> void execute(final String key, final int id, final Phlux.BackgroundEntry entry) {
-        entry.action().execute(new Action1<PhluxFunction<T>>() {
+    public <S extends PhluxState> void execute(final String key, final int id, final Phlux.BackgroundEntry entry) {
+        entry.action().execute(new Action1<PhluxFunction<S>>() {
             @Override
-            public void call(PhluxFunction<T> action1) {
+            public void call(PhluxFunction<S> action1) {
                 Phlux.ScopeData data = root.get(key);
                 if (data.background().values().contains(entry)) {
                     if (!entry.sticky())
@@ -63,7 +63,7 @@ public enum Phlux {
         callbacks = without(callbacks, key);
     }
 
-    public <T extends PhluxState> Observable<T> state(String key) {
+    public <S extends PhluxState> Observable<S> state(String key) {
         if (!callbacks.containsKey(key)) {
             PhluxState initial = root.get(key).state();
             callbacks = with(callbacks, key, BehaviorSubject.create(initial));
@@ -71,7 +71,7 @@ public enum Phlux {
         return callbacks.get(key);
     }
 
-    public <T extends PhluxState> void background(String key, int id, PhluxBackground<T> action, boolean sticky) {
+    public <S extends PhluxState> void background(String key, int id, PhluxBackground<S> action, boolean sticky) {
         Phlux.ScopeData data = root.get(key);
         Phlux.BackgroundEntry entry = Phlux.BackgroundEntry.create(action, sticky);
         root = with(root, key, Phlux.ScopeData.create(data.state(), with(data.background(), id, entry)));
