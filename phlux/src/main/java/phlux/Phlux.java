@@ -8,8 +8,8 @@ import java.util.Map;
 
 import auto.parcel.AutoParcel;
 
-import static phlux.Fn.with;
-import static phlux.Fn.without;
+import static phlux.Util.with;
+import static phlux.Util.without;
 
 /**
  * This singleton should be a single place where mutable state of the entire application is stored.
@@ -20,7 +20,7 @@ public enum Phlux {
     INSTANCE;
 
     private Map<String, ScopeData> root = Collections.emptyMap();
-    private Map<String, List<PhluxCallback>> callbacks = Collections.emptyMap();
+    private Map<String, List<PhluxStateCallback>> callbacks = Collections.emptyMap();
 
     public ScopeData get(String key) {
         return root.get(key);
@@ -36,7 +36,7 @@ public enum Phlux {
         S newValue = action.call(oldValue);
         root = with(root, key, ScopeData.create(newValue, data.background()));
 
-        for (PhluxCallback callback : callbacks.get(key))
+        for (PhluxStateCallback callback : callbacks.get(key))
             callback.call(newValue);
     }
 
@@ -59,13 +59,13 @@ public enum Phlux {
         callbacks = without(callbacks, key);
     }
 
-    public <S extends PhluxState> void register(String key, PhluxCallback<S> callback) {
-        List<PhluxCallback> cs = callbacks.get(key);
-        callbacks = with(callbacks, key, with(cs != null ? cs : Collections.<PhluxCallback>emptyList(), callback));
+    public <S extends PhluxState> void register(String key, PhluxStateCallback<S> callback) {
+        List<PhluxStateCallback> cs = callbacks.get(key);
+        callbacks = with(callbacks, key, with(cs != null ? cs : Collections.<PhluxStateCallback>emptyList(), callback));
         callback.call((S) root.get(key).state());
     }
 
-    public <S extends PhluxState> void unregister(String key, PhluxCallback<S> callback) {
+    public <S extends PhluxState> void unregister(String key, PhluxStateCallback<S> callback) {
         callbacks = with(callbacks, key, without(callbacks.get(key), callback));
     }
 

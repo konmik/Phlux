@@ -7,7 +7,6 @@ import phlux.PhluxBackground;
 import phlux.PhluxFunction;
 import phlux.PhluxState;
 import rx.Subscription;
-import rx.functions.Action1;
 
 /**
  * This is an *example* of how to adopt Phlux to your Activities.
@@ -37,16 +36,6 @@ public abstract class PhluxActivity<S extends PhluxState> extends Activity {
     protected abstract S initial();
     protected abstract void update(S state);
 
-    /**
-     * Override this method to bind your own RxJava subscriptions.
-     * The method is called during the first onResume.
-     * The returned subscription will be unsubscibed during onDestroy.
-     */
-    protected Subscription subscribe() {
-        return scope.state()
-            .subscribe(this::update);
-    }
-
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -58,7 +47,8 @@ public abstract class PhluxActivity<S extends PhluxState> extends Activity {
     protected void onResume() {
         super.onResume();
         if (subscription == null)
-            subscription = subscribe();
+            subscription = scope.state()
+                .subscribe(this::update);
     }
 
     @Override

@@ -2,7 +2,7 @@ package base;
 
 import android.os.Bundle;
 
-import phlux.PhluxCallback;
+import phlux.PhluxStateCallback;
 import phlux.PhluxScope;
 import phlux.PhluxState;
 import rx.Observable;
@@ -20,7 +20,7 @@ public class RxPhluxScope<S extends PhluxState> extends PhluxScope<S> {
 
     public Observable<S> state() {
         return Observable.<S>create(subscriber -> {
-            PhluxCallback<S> callback = subscriber::onNext;
+            PhluxStateCallback<S> callback = subscriber::onNext;
             register(callback);
             subscriber.add(Subscriptions.create(() -> unregister(callback)));
         });

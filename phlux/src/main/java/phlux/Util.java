@@ -10,7 +10,7 @@ import java.util.Map;
  * A set of utility methods to create modified
  * collections instead of mutating them directly.
  */
-class Fn {
+class Util {
 
     static <K, V> Map<K, V> with(Map<K, V> src, K key, V value) {
         HashMap<K, V> dst = new HashMap<>(src);

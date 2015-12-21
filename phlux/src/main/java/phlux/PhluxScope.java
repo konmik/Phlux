@@ -71,11 +71,11 @@ public class PhluxScope<S extends PhluxState> {
         phlux.remove(key);
     }
 
-    public void register(PhluxCallback<S> callback) {
+    public void register(PhluxStateCallback<S> callback) {
         phlux.register(key, callback);
     }
 
-    public void unregister(PhluxCallback<S> callback) {
+    public void unregister(PhluxStateCallback<S> callback) {
         phlux.unregister(key, callback);
     }
 }
