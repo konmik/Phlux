@@ -25,7 +25,7 @@ are quite good and I personally don't want to lose them.
 
 6. Despite MVP/C libraries reduce the pain of Android lifecycles,
 there are still some lifecycles and there is still some pain.
-Phlux allows to completely forget about Android lifecycles!
+Phlux allows to forget about Android lifecycles even more!
 
 7. Get ready for [Hot Code Swapping](https://www.youtube.com/watch?v=YYin_N6xXxQ&feature=youtu.be&t=37m32s)!
 
