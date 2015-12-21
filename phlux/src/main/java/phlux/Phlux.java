@@ -1,12 +1,11 @@
 package phlux;
 
+import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
-import auto.parcel.AutoParcel;
 
 import static phlux.Util.with;
 import static phlux.Util.without;
@@ -32,22 +31,22 @@ public enum Phlux {
 
     public <S extends PhluxState> void apply(String key, PhluxFunction<S> action) {
         ScopeData data = root.get(key);
-        S oldValue = (S) data.state();
+        S oldValue = (S) data.state;
         S newValue = action.call(oldValue);
-        root = with(root, key, ScopeData.create(newValue, data.background()));
+        root = with(root, key, new ScopeData(newValue, data.background));
 
         for (PhluxStateCallback callback : callbacks.get(key))
             callback.call(newValue);
     }
 
     public <S extends PhluxState> void execute(final String key, final int id, final Phlux.BackgroundEntry entry) {
-        entry.action().execute(new PhluxBackgroundCallback<S>() {
+        entry.action.execute(new PhluxBackgroundCallback<S>() {
             @Override
             public void call(PhluxFunction<S> function) {
-                Phlux.ScopeData data = root.get(key);
-                if (data.background().values().contains(entry)) {
-                    if (!entry.sticky())
-                        root = with(root, key, Phlux.ScopeData.create(data.state(), without(data.background(), id)));
+                ScopeData data = root.get(key);
+                if (data.background.values().contains(entry)) {
+                    if (!entry.sticky)
+                        root = with(root, key, new ScopeData(data.state, without(data.background, id)));
                     apply(key, function);
                 }
             }
@@ -62,7 +61,7 @@ public enum Phlux {
     public <S extends PhluxState> void register(String key, PhluxStateCallback<S> callback) {
         List<PhluxStateCallback> cs = callbacks.get(key);
         callbacks = with(callbacks, key, with(cs != null ? cs : Collections.<PhluxStateCallback>emptyList(), callback));
-        callback.call((S) root.get(key).state());
+        callback.call((S) root.get(key).state);
     }
 
     public <S extends PhluxState> void unregister(String key, PhluxStateCallback<S> callback) {
@@ -70,31 +69,87 @@ public enum Phlux {
     }
 
     public <S extends PhluxState> void background(String key, int id, PhluxBackground<S> action, boolean sticky) {
-        Phlux.ScopeData data = root.get(key);
-        Phlux.BackgroundEntry entry = Phlux.BackgroundEntry.create(action, sticky);
-        root = with(root, key, Phlux.ScopeData.create(data.state(), with(data.background(), id, entry)));
+        ScopeData data = root.get(key);
+        Phlux.BackgroundEntry entry = new Phlux.BackgroundEntry(action, sticky);
+        root = with(root, key, new ScopeData(data.state, with(data.background, id, entry)));
         execute(key, id, entry);
     }
 
-    @AutoParcel
-    static abstract class BackgroundEntry implements Parcelable {
+    static class ScopeData implements Parcelable {
 
-        abstract PhluxBackground action();
-        abstract boolean sticky();
+        final PhluxState state;
+        final Map<Integer, BackgroundEntry> background;
 
-        static BackgroundEntry create(PhluxBackground action, boolean sticky) {
-            return new AutoParcel_Phlux_BackgroundEntry(action, sticky);
+        public ScopeData(PhluxState state, Map<Integer, BackgroundEntry> background) {
+            this.state = state;
+            this.background = background;
         }
+
+        protected ScopeData(Parcel in) {
+            state = in.readParcelable(PhluxState.class.getClassLoader());
+            background = Collections.unmodifiableMap(in.readHashMap(PhluxState.class.getClassLoader()));
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeParcelable(state, flags);
+            dest.writeMap(background);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        public static final Creator<ScopeData> CREATOR = new Creator<ScopeData>() {
+            @Override
+            public ScopeData createFromParcel(Parcel in) {
+                return new ScopeData(in);
+            }
+
+            @Override
+            public ScopeData[] newArray(int size) {
+                return new ScopeData[size];
+            }
+        };
     }
 
-    @AutoParcel
-    static abstract class ScopeData implements Parcelable {
+    static class BackgroundEntry implements Parcelable {
 
-        abstract PhluxState state();
-        abstract Map<Integer, BackgroundEntry> background();
+        final PhluxBackground action;
+        final boolean sticky;
 
-        static ScopeData create(PhluxState state, Map<Integer, BackgroundEntry> background) {
-            return new AutoParcel_Phlux_ScopeData(state, background);
+        public BackgroundEntry(PhluxBackground action, boolean sticky) {
+            this.action = action;
+            this.sticky = sticky;
         }
+
+        protected BackgroundEntry(Parcel in) {
+            action = in.readParcelable(PhluxBackground.class.getClassLoader());
+            sticky = in.readByte() != 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeParcelable(action, flags);
+            dest.writeByte((byte) (sticky ? 1 : 0));
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        public static final Creator<BackgroundEntry> CREATOR = new Creator<BackgroundEntry>() {
+            @Override
+            public BackgroundEntry createFromParcel(Parcel in) {
+                return new BackgroundEntry(in);
+            }
+
+            @Override
+            public BackgroundEntry[] newArray(int size) {
+                return new BackgroundEntry[size];
+            }
+        };
     }
 }

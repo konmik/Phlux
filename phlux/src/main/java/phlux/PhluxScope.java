@@ -21,7 +21,7 @@ public class PhluxScope<S extends PhluxState> {
      */
     public PhluxScope(S state) {
         this.key = UUID.randomUUID().toString();
-        phlux.put(key, Phlux.ScopeData.create(state, Collections.<Integer, Phlux.BackgroundEntry>emptyMap()));
+        phlux.put(key, new Phlux.ScopeData(state, Collections.<Integer, Phlux.BackgroundEntry>emptyMap()));
     }
 
     /**
@@ -32,7 +32,7 @@ public class PhluxScope<S extends PhluxState> {
         if (phlux.get(key) == null) {
             Phlux.ScopeData data = bundle.getParcelable("data");
             phlux.put(key, data);
-            for (Map.Entry<Integer, Phlux.BackgroundEntry> entry : data.background().entrySet())
+            for (Map.Entry<Integer, Phlux.BackgroundEntry> entry : data.background.entrySet())
                 phlux.execute(key, entry.getKey(), entry.getValue());
         }
     }
