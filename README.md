@@ -31,7 +31,7 @@ So I decided to implement a simplified version of Flux that
 is more Android-friendly and allows to call `view.update(immutableState)`
 at the end of all.
 
-`update` Looks like ViewHolder's method, isn't it?
+`update` Looks like a ViewHolder's method, isn't it?
 A ViewHolder does not have many variables in it
 (it must not have variables at all if you're doing everything properly).
 So how about turning your entire activity into a simple ViewHolder?
@@ -75,3 +75,7 @@ I can create an application which has only *one* mutable variable!
 Overall, I feel that the library has a great potential. It is clearly better than MVP/C libraries.
 The library can potentially fit very well into MVVM but I do not care about data binding much).
 
+### TODO
+
+In some cases we need to call background and UI tasks sequentially.
+This is still a pain, so I think about implementing Interactor pattern on top of Phlux.
