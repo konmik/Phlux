@@ -3,9 +3,8 @@ package base;
 import android.app.Activity;
 import android.os.Bundle;
 
-import phlux.PhluxFunction;
 import phlux.PhluxBackground;
-import phlux.PhluxScope;
+import phlux.PhluxFunction;
 import phlux.PhluxState;
 import rx.Subscription;
 import rx.functions.Action1;
@@ -16,15 +15,15 @@ import rx.functions.Action1;
 public abstract class PhluxActivity<S extends PhluxState> extends Activity {
 
     private static final String PHLUX_SCOPE = "phlux_scope";
-    private PhluxScope<S> scope;
+    private RxPhluxScope<S> scope;
     private Subscription subscription;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         scope = savedInstanceState == null ?
-            new PhluxScope<S>(initial()) :
-            new PhluxScope<S>(savedInstanceState.getBundle(PHLUX_SCOPE));
+            new RxPhluxScope<S>(initial()) :
+            new RxPhluxScope<S>(savedInstanceState.getBundle(PHLUX_SCOPE));
     }
 
     public void apply(PhluxFunction<S> action) {

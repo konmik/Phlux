@@ -6,8 +6,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
-import rx.Observable;
-
 /**
  * Represents a keyed access to Phlux methods.
  * {@link PhluxScope} is useful when dealing with independent scopes of data.
@@ -73,7 +71,11 @@ public class PhluxScope<S extends PhluxState> {
         phlux.remove(key);
     }
 
-    public Observable<S> state() {
-        return phlux.state(key);
+    public void register(PhluxCallback<S> callback) {
+        phlux.register(key, callback);
+    }
+
+    public void unregister(PhluxCallback<S> callback) {
+        phlux.unregister(key, callback);
     }
 }

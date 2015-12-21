@@ -3,8 +3,9 @@ package example;
 import auto.parcel.AutoParcel;
 import base.App;
 import base.ServerAPI;
-import phlux.PhluxFunction;
 import phlux.PhluxBackground;
+import phlux.PhluxBackgroundCallback;
+import phlux.PhluxFunction;
 import phlux.Transient;
 import rx.functions.Action1;
 
@@ -20,7 +21,7 @@ public abstract class Request implements PhluxBackground<MainState> {
     }
 
     @Override
-    public void execute(final Action1<PhluxFunction<MainState>> callback) {
+    public void execute(final PhluxBackgroundCallback<MainState> callback) {
         App.getServerAPI()
             .getItems(name().split("\\s+")[0], name().split("\\s+")[1])
             .observeOn(mainThread())

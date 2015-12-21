@@ -2,13 +2,11 @@ package phlux;
 
 import android.os.Parcelable;
 
-import rx.functions.Action1;
-
 /**
  * Represents a background action.
  *
  * The typical use case is to extend the class to keep arguments in it and to implement
- * {@link PhluxBackground#execute(Action1)} to execute the background task itself.
+ * {@link PhluxBackground#execute(PhluxBackgroundCallback)} to execute the background task itself.
  *
  * All subclasses of {@link PhluxBackground} *must* be immutable.
  */
@@ -21,5 +19,5 @@ public interface PhluxBackground<S extends PhluxState> extends Parcelable {
      *                 The current implementation implies that the callback must be called
      *                 on the main thread.
      */
-    void execute(Action1<PhluxFunction<S>> callback);
+    void execute(PhluxBackgroundCallback<S> callback);
 }
