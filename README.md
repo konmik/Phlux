@@ -27,6 +27,8 @@ are quite good and I personally don't want to lose them.
 there are still some lifecycles and there is still some pain.
 Phlux allows to completely forget about Android lifecycles!
 
+7. Get ready for Hot Code Swapping!
+
 So I decided to implement a simplified version of Flux that
 is more Android-friendly and allows to call `view.update(immutableState)`
 at the end of all.
