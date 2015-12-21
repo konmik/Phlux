@@ -44,12 +44,7 @@ public abstract class PhluxActivity<S extends PhluxState> extends Activity {
      */
     protected Subscription subscribe() {
         return scope.state()
-            .subscribe(new Action1<S>() {
-                @Override
-                public void call(S state) {
-                    update(state);
-                }
-            });
+            .subscribe(this::update);
     }
 
     @Override

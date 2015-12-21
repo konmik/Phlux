@@ -1,3 +1,4 @@
+// apt
 buildscript {
     repositories {
         jcenter()
@@ -8,8 +9,18 @@ buildscript {
     }
 }
 
+// retrolambda
+buildscript {
+    dependencies {
+        classpath 'me.tatarka:gradle-retrolambda:3.2.4'
+        classpath 'me.tatarka.retrolambda.projectlombok:lombok.ast:0.2.3.a2'
+    }
+    configurations.classpath.exclude group: 'com.android.tools.external.lombok'
+}
+
 apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
+apply plugin: 'me.tatarka.retrolambda'
 
 repositories {
     jcenter()
@@ -25,6 +36,11 @@ android {
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 }
 

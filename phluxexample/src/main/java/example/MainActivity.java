@@ -1,16 +1,14 @@
 package example;
 
 import android.os.Bundle;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.CheckedTextView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import base.PhluxActivity;
 import base.ServerAPI;
 import info.android15.phluxexample.R;
-import phlux.PhluxFunction;
-import base.PhluxActivity;
 
 public class MainActivity extends PhluxActivity<MainState> {
 
@@ -34,18 +32,8 @@ public class MainActivity extends PhluxActivity<MainState> {
         check1.setText(NAME_1);
         check2.setText(NAME_2);
 
-        check1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                switchTo(NAME_1);
-            }
-        });
-        check2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                switchTo(NAME_2);
-            }
-        });
+        check1.setOnClickListener(v -> switchTo(NAME_1));
+        check2.setOnClickListener(v -> switchTo(NAME_2));
 
         ListView listView = (ListView) findViewById(R.id.listView);
         listView.setAdapter(adapter = new ArrayAdapter<>(this, R.layout.item));
@@ -55,14 +43,9 @@ public class MainActivity extends PhluxActivity<MainState> {
     }
 
     private void switchTo(final String name) {
-        apply(new PhluxFunction<MainState>() {
-            @Override
-            public MainState call(MainState state) {
-                return state.toBuilder()
-                    .name(name)
-                    .build();
-            }
-        });
+        apply(state -> state.toBuilder()
+            .name(name)
+            .build());
         background(REQUEST_ID, Request.create(name), true);
     }
 

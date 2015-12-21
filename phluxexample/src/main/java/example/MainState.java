@@ -18,8 +18,8 @@ public abstract class MainState implements Parcelable, PhluxState {
     public static MainState create(String name) {
         return new AutoParcel_MainState.Builder()
             .name(name)
-            .error(new Transient<String>())
-            .items(new Transient<ServerAPI.Item[]>())
+            .error(new Transient<>())
+            .items(new Transient<>())
             .build();
     }
 
