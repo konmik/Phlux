@@ -21,7 +21,7 @@ public class PhluxScope<S extends PhluxState> {
      */
     public PhluxScope(S state) {
         this.key = UUID.randomUUID().toString();
-        phlux.put(key, new Phlux.ScopeData(state, Collections.<Integer, Phlux.BackgroundEntry>emptyMap()));
+        phlux.put(key, new Data.ScopeData(state, Collections.<Integer, Data.BackgroundEntry>emptyMap()));
     }
 
     /**
@@ -30,9 +30,9 @@ public class PhluxScope<S extends PhluxState> {
     public PhluxScope(Bundle bundle) {
         this.key = bundle.getString("key");
         if (phlux.get(key) == null) {
-            Phlux.ScopeData data = bundle.getParcelable("data");
+            Data.ScopeData data = bundle.getParcelable("data");
             phlux.put(key, data);
-            for (Map.Entry<Integer, Phlux.BackgroundEntry> entry : data.background.entrySet())
+            for (Map.Entry<Integer, Data.BackgroundEntry> entry : data.background.entrySet())
                 phlux.execute(key, entry.getKey(), entry.getValue());
         }
     }
@@ -65,16 +65,24 @@ public class PhluxScope<S extends PhluxState> {
     }
 
     /**
-     * Finally dispose the scope. Do this on Activity.onDestroy when is
+     * Finally dispose the scope. Do this on Activity.onDestroy when isFinishing() is true.
+     * If the scope is controlled by a Fragment then you need to manually control it's existence.
      */
     public void remove() {
         phlux.remove(key);
     }
 
+    /**
+     * Registers a callback for state updates.
+     * Once registered the callback will be fired immediately.
+     */
     public void register(PhluxStateCallback<S> callback) {
         phlux.register(key, callback);
     }
 
+    /**
+     * Unregisters a given state callback.
+     */
     public void unregister(PhluxStateCallback<S> callback) {
         phlux.unregister(key, callback);
     }

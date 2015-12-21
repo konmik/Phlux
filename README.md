@@ -55,11 +55,11 @@ This schema represents the Phlux data flow. Whenever an action occurs (be it a b
 completion or an UI event) it applies to *State* and then *View* should automatically
 be updated from the new *State* instance.
 
+Phlux automatically manages updates and background task connections.
+
 When the application needs to update a view it should ask Phlux to `apply()` a function to the corresponding state.
 Phlux manages all the internal stuff to avoid any data modification. The only variable that gets changed after
 the called function is *Phlux Root*.
-
-Phlux automatically manages updates and background task connections.
 
 ![Data Model](https://github.com/konmik/Phlux/blob/resources/doc/data_model.png)
 
@@ -72,8 +72,8 @@ Every *Scope* also has a list of current background tasks.
 Whenever a process gets wiped out Phlux automatically restores scopes
 and relaunches their tasks that did not complete yet.
 
-The entire architecture is so simple, it is hard to believe that
-no one did like this before (if you did, then why didn't you release the
+The entire architecture is so simple (14Kb jar), it is hard to believe that
+no one have it implemented like this yet (if you have, then why didn't you release the
 damn library so I could just relax and write reliable apps easily?)
 
 ### Data requirements
