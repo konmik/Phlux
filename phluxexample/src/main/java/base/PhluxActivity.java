@@ -5,8 +5,9 @@ import android.os.Bundle;
 
 import phlux.PhluxBackground;
 import phlux.PhluxFunction;
+import phlux.PhluxScope;
 import phlux.PhluxState;
-import rx.Subscription;
+import phlux.PhluxStateCallback;
 
 /**
  * This is an *example* of how to adopt Phlux to your Activities.
@@ -14,15 +15,16 @@ import rx.Subscription;
 public abstract class PhluxActivity<S extends PhluxState> extends Activity {
 
     private static final String PHLUX_SCOPE = "phlux_scope";
-    private RxPhluxScope<S> scope;
-    private Subscription subscription;
+    private PhluxScope<S> scope;
+    private boolean registered;
+    private PhluxStateCallback<S> stateCallback = this::update;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         scope = savedInstanceState == null ?
-            new RxPhluxScope<>(initial()) :
-            new RxPhluxScope<>(savedInstanceState.getBundle(PHLUX_SCOPE));
+            new PhluxScope<>(initial()) :
+            new PhluxScope<>(savedInstanceState.getBundle(PHLUX_SCOPE));
     }
 
     public void apply(PhluxFunction<S> function) {
@@ -45,16 +47,19 @@ public abstract class PhluxActivity<S extends PhluxState> extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (subscription == null)
-            subscription = scope.state()
-                .subscribe(this::update);
+        if (!registered) {
+            scope.register(stateCallback);
+            registered = true;
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        subscription.unsubscribe();
-        subscription = null;
+        if (registered) {
+            scope.unregister(stateCallback);
+            registered = false;
+        }
         if (isFinishing())
             scope.remove();
     }
