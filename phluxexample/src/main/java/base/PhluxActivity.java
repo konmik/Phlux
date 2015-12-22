@@ -21,16 +21,16 @@ public abstract class PhluxActivity<S extends PhluxState> extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         scope = savedInstanceState == null ?
-            new RxPhluxScope<S>(initial()) :
-            new RxPhluxScope<S>(savedInstanceState.getBundle(PHLUX_SCOPE));
+            new RxPhluxScope<>(initial()) :
+            new RxPhluxScope<>(savedInstanceState.getBundle(PHLUX_SCOPE));
     }
 
-    public void apply(PhluxFunction<S> action) {
-        scope.apply(action);
+    public void apply(PhluxFunction<S> function) {
+        scope.apply(function);
     }
 
-    public void background(int id, PhluxBackground<S> action, boolean sticky) {
-        scope.background(id, sticky, action);
+    public void background(int id, PhluxBackground<S> background, boolean sticky) {
+        scope.background(id, background, sticky);
     }
 
     protected abstract S initial();
@@ -39,8 +39,7 @@ public abstract class PhluxActivity<S extends PhluxState> extends Activity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        Bundle state = scope.save();
-        outState.putParcelable(PHLUX_SCOPE, state);
+        outState.putParcelable(PHLUX_SCOPE, scope.save());
     }
 
     @Override

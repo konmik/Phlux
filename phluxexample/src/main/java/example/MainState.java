@@ -1,14 +1,12 @@
 package example;
 
-import android.os.Parcelable;
-
 import auto.parcel.AutoParcel;
 import base.ServerAPI;
 import phlux.PhluxState;
 import phlux.Transient;
 
 @AutoParcel
-public abstract class MainState implements Parcelable, PhluxState {
+public abstract class MainState implements PhluxState {
     public abstract String name();
     public abstract Transient<String> error();
     public abstract Transient<ServerAPI.Item[]> items();

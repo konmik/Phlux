@@ -2,14 +2,12 @@ package phlux;
 
 import android.os.Bundle;
 
-import java.util.Collections;
-import java.util.Map;
 import java.util.UUID;
 
 /**
- * Represents a keyed access to Phlux methods.
- * {@link PhluxScope} is useful when dealing with independent scopes of data.
- * For example, Activity, Fragment, a custom View can be considered to be scopes.
+ * Represents an easy and type-safe access to {@link Phlux}.
+ *
+ * {@link PhluxScope} represents internal state of a View.
  */
 public class PhluxScope<S extends PhluxState> {
 
@@ -21,7 +19,7 @@ public class PhluxScope<S extends PhluxState> {
      */
     public PhluxScope(S state) {
         this.key = UUID.randomUUID().toString();
-        phlux.put(key, new Data.ScopeData(state, Collections.<Integer, Data.BackgroundEntry>emptyMap()));
+        phlux.create(key, state);
     }
 
     /**
@@ -29,12 +27,7 @@ public class PhluxScope<S extends PhluxState> {
      */
     public PhluxScope(Bundle bundle) {
         this.key = bundle.getString("key");
-        if (phlux.get(key) == null) {
-            Data.ScopeData data = bundle.getParcelable("data");
-            phlux.put(key, data);
-            for (Map.Entry<Integer, Data.BackgroundEntry> entry : data.background.entrySet())
-                phlux.execute(key, entry.getKey(), entry.getValue());
-        }
+        phlux.restore(key, bundle.getParcelable("scope"));
     }
 
     /**
@@ -43,25 +36,25 @@ public class PhluxScope<S extends PhluxState> {
     public Bundle save() {
         Bundle bundle = new Bundle();
         bundle.putString("key", key);
-        bundle.putParcelable("data", Phlux.INSTANCE.get(key));
+        bundle.putParcelable("scope", Phlux.INSTANCE.get(key));
         return bundle;
     }
 
     /**
      * Applies a function to the scope's state.
      */
-    public void apply(PhluxFunction<S> action) {
-        phlux.apply(key, action);
+    public void apply(PhluxFunction<S> function) {
+        phlux.apply(key, function);
     }
 
     /**
-     * Executes a background action.
+     * Executes a background background.
      *
      * Sticky means that the request will not be removed after it's execution and will be re-executed
      * on a process termination.
      */
-    public void background(int id, boolean sticky, PhluxBackground<S> action) {
-        phlux.background(key, id, action, sticky);
+    public void background(int id, PhluxBackground<S> background, boolean sticky) {
+        phlux.background(key, id, background, sticky);
     }
 
     /**

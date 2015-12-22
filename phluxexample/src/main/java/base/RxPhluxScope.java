@@ -2,9 +2,9 @@ package base;
 
 import android.os.Bundle;
 
-import phlux.PhluxStateCallback;
 import phlux.PhluxScope;
 import phlux.PhluxState;
+import phlux.PhluxStateCallback;
 import rx.Observable;
 import rx.subscriptions.Subscriptions;
 
