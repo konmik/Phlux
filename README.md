@@ -121,6 +121,8 @@ show a dialog again, pass some data to server, etc. Things are worse because on 
 we can lost the current state and views easily, our dialogs can be dismissed without a user action, and so on.
 This is still a pain, so I think about implementing Interactor pattern on top of Phlux.
 
+- Dagger integration example.
+
 - 100% test coverage, as usual.
 
 - Docs? :D
