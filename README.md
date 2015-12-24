@@ -100,13 +100,13 @@ of variables we can afford? How can we architect our apps to get most of the
 
 A Phlux-driven application can afford to have just two variables.
 
-- Yep, but immutability comes with a price of increased garbage collection!
+*"But immutability comes with a price of increased garbage collection!"*
 
 Not so bad, when we need to replace the root application variable we can reference
 parts of the previous root variable. What will be GC'ed is only the difference
 between two values which is not a problem. Be honest - who cares about reusing
 content of previous variables that was allocated for usage in an adapter? No one, we
-just drop them. The same is here, but we can do it in a much more reliable way.
+just drop them. The same is here, but we can do this in a much more reliable way.
 
 ### Data requirements
 
