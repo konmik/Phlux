@@ -80,7 +80,7 @@ damn library so I could just relax and write reliable apps easily?)
 
 Functional programming is a programming style/language that is based on two practicies:
 
-- Ability to compose code by passing references to functons (lambdas) into other functions.
+- Code composition by passing references to functons (lambdas) into other functions.
 - Immutable data.
 
 First point is out of the current interest.
