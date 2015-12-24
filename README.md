@@ -76,6 +76,38 @@ The entire architecture is so simple (14Kb jar), it is hard to believe that
 no one have it implemented like this yet (if you have, then why didn't you release the
 damn library so I could just relax and write reliable apps easily?)
 
+### Why functional
+
+Functional programming is a programming style/language that is based on two practicies:
+
+- Ability to compose code by passing references to functons (lambdas) into other functions.
+- Immutable data.
+
+First point is out of the current interest.
+
+The second point is unbelievable important for good archivecture and application simplicity.
+Every variable we have needs a special treating. We must constantly care about variables to
+have values that correspond to other values in the application. We need to keep eye on the
+order of variable initialization and changes. Every variable we have adds complexity.
+We've called one method and changes are propagating across the application
+without strict control. We've passed a reference to an object that has mutable variables
+in it and we've got troubles.
+In a multi-threading environment this complexity becomes stunning.
+
+But do we really need tons of variables in each application? And, what is a minimun amount
+of variables we can afford? How can we architect our apps to get most of the
+"minimum variables amout" principle?
+
+A Phlux-driven application can afford to have just two variables.
+
+- Yep, but immutability comes with a price of increased garbage collection!
+
+Not so bad, when we need to replace the root application variable we can reference
+parts of the previous root variable. What will be GC'ed is only the difference
+between two values which is not a problem. Be honest - who cares about reusing
+content of previous variables that was allocated for usage in an adapter? No one, we
+just drop them. The same is here, but we can do it in a much more reliable way.
+
 ### Data requirements
 
 Most data in a Phlux application must implement `Parcelable` interface.
