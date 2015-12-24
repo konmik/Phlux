@@ -141,6 +141,10 @@ So they must implement `Parcelable` as well.
 Background tasks may have `sticky` property to automatically refresh temporary data when it gets lost during
 Android lifecycles.
 
+There is a problem: we somehow need to save the reference to a function that will start
+a background task from restored arguments.
+The problem has been solved by bundling the function with it's arguments into a single parcelable class.
+
 ### Library status
 
 The library status is: "Wow, I can do this!".
