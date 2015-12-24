@@ -108,6 +108,11 @@ between two values which is not a problem. Be honest - who cares about reusing
 content of previous variables that was allocated for usage in an adapter? No one, we
 just drop them. The same is here, but we can do this in a much more reliable way.
 
+`AutoParcel` has a great support of the Builder pattern that allows to easily
+create copies of modified data structures. `Solid` allows to do the same with collections
+using streams. Java alone is not capable of applying this strategy, but with these two
+libraries the job can be done.
+
 ### Data requirements
 
 Most data in a Phlux application must implement `Parcelable` interface.
