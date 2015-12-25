@@ -95,7 +95,7 @@ in it and we've got troubles.
 In a multi-threading environment this complexity becomes stunning.
 
 MVP/C architecture does not scale well just because of this single reason - uncontrolled and
-unpredictable propagating of changes across applcation.
+unpredictable propagation of changes across applcation.
 
 But do we really need tons of variables in each application? And, what is a minimun amount
 of variables we can afford? How can we architect our apps to get most of the
