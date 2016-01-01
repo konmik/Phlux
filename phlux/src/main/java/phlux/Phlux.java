@@ -39,6 +39,10 @@ public enum Phlux {
         callbacks = without(callbacks, key);
     }
 
+    public PhluxState state(String key) {
+        return root.get(key).state;
+    }
+
     public <S extends PhluxState> void apply(String key, PhluxFunction<S> function) {
         Scope scope = root.get(key);
         S newValue = function.call((S) scope.state);

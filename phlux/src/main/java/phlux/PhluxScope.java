@@ -31,6 +31,13 @@ public class PhluxScope<S extends PhluxState> {
     }
 
     /**
+     * Returns the current scope's state.
+     */
+    public S state() {
+        return (S) Phlux.INSTANCE.state(key);
+    }
+
+    /**
      * Saves the scope into {@link Bundle}.
      */
     public Bundle save() {

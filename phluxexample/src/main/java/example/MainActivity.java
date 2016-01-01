@@ -56,13 +56,18 @@ public class MainActivity extends PhluxActivity<MainState> {
 
     @Override
     protected void update(MainState state) {
-        check1.setChecked(state.name().equals(NAME_1));
-        check2.setChecked(state.name().equals(NAME_2));
-
-        adapter.clear();
-        if (state.items().isPresent())
-            adapter.addAll(state.items().get());
-        if (state.error().isPresent())
-            Toast.makeText(this, state.error().get(), Toast.LENGTH_LONG).show();
+        part("tabs", state.name(), name -> {
+            check1.setChecked(name.equals(NAME_1));
+            check2.setChecked(name.equals(NAME_2));
+        });
+        part("items", state.items(), items -> {
+            adapter.clear();
+            if (items.isPresent())
+                adapter.addAll(items.get());
+        });
+        part("error", state.error(), error -> {
+            if (error.isPresent())
+                Toast.makeText(this, error.get(), Toast.LENGTH_LONG).show();
+        });
     }
 }
