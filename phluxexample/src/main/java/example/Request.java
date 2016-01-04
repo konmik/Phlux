@@ -31,7 +31,7 @@ public abstract class Request implements PhluxBackground<MainState> {
                         .build()),
                 throwable ->
                     callback.call(state -> state.toBuilder()
-                        .error(new Transient<>(throwable.toString()))
+                        .error(throwable.toString())
                         .build()));
     }
 }

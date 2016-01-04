@@ -44,12 +44,14 @@ public enum Phlux {
     }
 
     public <S extends PhluxState> void apply(String key, PhluxFunction<S> function) {
-        Scope scope = root.get(key);
-        S newValue = function.call((S) scope.state);
-        root = with(root, key, new Scope(newValue, scope.background, scope.backgroundSticky));
+        if (root.containsKey(key)) {
+            Scope scope = root.get(key);
+            S newValue = function.call((S) scope.state);
+            root = with(root, key, new Scope(newValue, scope.background, scope.backgroundSticky));
 
-        for (PhluxStateCallback callback : callbacks.get(key))
-            callback.call(newValue);
+            for (PhluxStateCallback callback : callbacks.get(key))
+                callback.call(newValue);
+        }
     }
 
     public void background(String key, int id, PhluxBackground task, boolean sticky) {

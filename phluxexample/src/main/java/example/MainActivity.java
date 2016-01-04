@@ -9,7 +9,6 @@ import android.widget.Toast;
 import base.PhluxActivity;
 import base.ServerAPI;
 import info.android15.phluxexample.R;
-import phlux.Transient;
 
 public class MainActivity extends PhluxActivity<MainState> {
 
@@ -65,16 +64,16 @@ public class MainActivity extends PhluxActivity<MainState> {
                 adapter.addAll(items.get());
         });
         part("error", state.error(), error -> {
-            if (error.isPresent()) {
-                Toast.makeText(this, error.get(), Toast.LENGTH_LONG).show();
-                post(this::deleteError);
+            if (error != null) {
+                Toast.makeText(this, error, Toast.LENGTH_LONG).show();
+                post(this::removeError);
             }
         });
     }
 
-    private void deleteError() {
+    private void removeError() {
         apply(s -> s.toBuilder()
-            .error(Transient.empty())
+            .error(null)
             .build());
     }
 }

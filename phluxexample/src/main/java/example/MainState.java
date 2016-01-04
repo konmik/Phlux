@@ -1,5 +1,7 @@
 package example;
 
+import android.support.annotation.Nullable;
+
 import auto.parcel.AutoParcel;
 import base.ServerAPI;
 import phlux.PhluxState;
@@ -13,24 +15,25 @@ public abstract class MainState implements PhluxState {
     static final String DEFAULT_NAME = NAME_1;
 
     public abstract String name();
-    public abstract Transient<String> error();
     public abstract Transient<ServerAPI.Item[]> items();
+    @Nullable
+    public abstract String error();
 
     public abstract Builder toBuilder();
 
     public static MainState create() {
         return new AutoParcel_MainState.Builder()
             .name(DEFAULT_NAME)
-            .error(new Transient<>())
             .items(new Transient<>())
+            .error(null)
             .build();
     }
 
     @AutoParcel.Builder
     interface Builder {
         Builder name(String x);
-        Builder error(Transient<String> x);
         Builder items(Transient<ServerAPI.Item[]> x);
+        Builder error(String x);
         MainState build();
     }
 }
