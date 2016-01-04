@@ -23,10 +23,11 @@ public abstract class PhluxActivity<S extends PhluxState> extends Activity {
     private boolean registered;
     private AtomicLong updateCounter = new AtomicLong();
     private PhluxStateCallback<S> stateCallback = state -> {
-        Log.v(getClass().getSimpleName(), "Update " + updateCounter.incrementAndGet());
+        log("Update " + updateCounter.incrementAndGet());
         update(state);
     };
     private LinkedHashMap<String, Object> updated = new LinkedHashMap<>();
+    private boolean updateAllOnResume;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +45,12 @@ public abstract class PhluxActivity<S extends PhluxState> extends Activity {
         scope.background(id, background, sticky);
     }
 
+    public void setUpdateAllOnResume(boolean update) {
+        this.updateAllOnResume = update;
+    }
+
     protected abstract S initial();
+
     protected abstract void update(S state);
 
     public S state() {
@@ -58,17 +64,23 @@ public abstract class PhluxActivity<S extends PhluxState> extends Activity {
     /**
      * Incorporates updating logic for a visual part of an activity,
      * allowing to update only parts of the activity that have updated state.
-     *
+     * <p>
      * Given we have a deal with immutable state, we only compare
      * references to objects instead of calling equals() to detect
      * changed data.
      */
     public <T> void part(String name, T newValue, FieldUpdater<T> updater) {
         if (!updated.containsKey(name) || updated.get(name) != newValue) {
-            Log.v(getClass().getSimpleName(), "Update " + updateCounter.get() + " part " + name);
+            log("Update " + updateCounter.get() + " part " + name);
             updater.call(newValue);
             updated.put(name, newValue);
         }
+    }
+
+    public void post(Runnable runnable) {
+        getWindow()
+            .getDecorView()
+            .post(runnable);
     }
 
     @Override
@@ -83,6 +95,9 @@ public abstract class PhluxActivity<S extends PhluxState> extends Activity {
         if (!registered) {
             scope.register(stateCallback);
             registered = true;
+        } else if (updateAllOnResume) {
+            updated.clear();
+            update(state()); // JRebel compatibility
         }
     }
 
@@ -95,5 +110,9 @@ public abstract class PhluxActivity<S extends PhluxState> extends Activity {
         }
         if (isFinishing())
             scope.remove();
+    }
+
+    private void log(String message) {
+        Log.d(getClass().getSimpleName(), message);
     }
 }

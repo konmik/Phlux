@@ -9,6 +9,7 @@ import android.widget.Toast;
 import base.PhluxActivity;
 import base.ServerAPI;
 import info.android15.phluxexample.R;
+import phlux.Transient;
 
 public class MainActivity extends PhluxActivity<MainState> {
 
@@ -25,6 +26,7 @@ public class MainActivity extends PhluxActivity<MainState> {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setUpdateAllOnResume(true);
 
         check1 = (CheckedTextView) findViewById(R.id.check1);
         check2 = (CheckedTextView) findViewById(R.id.check2);
@@ -66,8 +68,16 @@ public class MainActivity extends PhluxActivity<MainState> {
                 adapter.addAll(items.get());
         });
         part("error", state.error(), error -> {
-            if (error.isPresent())
+            if (error.isPresent()) {
                 Toast.makeText(this, error.get(), Toast.LENGTH_LONG).show();
+                post(this::deleteError);
+            }
         });
+    }
+
+    private void deleteError() {
+        apply(s -> s.toBuilder()
+            .error(Transient.empty())
+            .build());
     }
 }

@@ -19,8 +19,10 @@ public abstract class Request implements PhluxBackground<MainState> {
 
     @Override
     public void execute(PhluxBackgroundCallback<MainState> callback) {
+        String firstName = name().split("\\s+")[0];
+        String lastName = name().split("\\s+")[1];
         App.getServerAPI()
-            .getItems(name().split("\\s+")[0], name().split("\\s+")[1])
+            .getItems(firstName, lastName)
             .observeOn(mainThread())
             .subscribe(
                 response ->

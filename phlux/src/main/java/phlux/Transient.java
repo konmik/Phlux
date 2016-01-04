@@ -8,6 +8,8 @@ import android.os.Parcelable;
  */
 public class Transient<T> implements Parcelable {
 
+    private static final Transient EMPTY = new Transient();
+
     public final T value;
 
     public Transient() {
@@ -24,6 +26,10 @@ public class Transient<T> implements Parcelable {
 
     public boolean isPresent() {
         return value != null;
+    }
+
+    public static <T> Transient<T> empty() {
+        return EMPTY;
     }
 
     protected Transient(Parcel ignored, boolean fromParcel) {
