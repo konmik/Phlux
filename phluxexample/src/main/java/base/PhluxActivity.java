@@ -71,7 +71,7 @@ public abstract class PhluxActivity<S extends PhluxState> extends Activity imple
     @Override
     protected void onResume() {
         super.onResume();
-        adapter.onResume();
+        adapter.onResume(false);
     }
 
     @Override

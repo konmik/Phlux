@@ -27,7 +27,7 @@ public abstract class Request implements PhluxBackground<MainState> {
             .subscribe(
                 response ->
                     callback.call(state -> state.toBuilder()
-                        .items(new Transient<>(response.items))
+                        .items(Transient.of(response.items))
                         .build()),
                 throwable ->
                     callback.call(state -> state.toBuilder()

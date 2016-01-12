@@ -16,10 +16,6 @@ public class Transient<T> implements Parcelable {
         value = null;
     }
 
-    public Transient(T value) {
-        this.value = value;
-    }
-
     public T get() {
         return value;
     }
@@ -32,8 +28,16 @@ public class Transient<T> implements Parcelable {
         return EMPTY;
     }
 
+    public static <T> Transient<T> of(T value) {
+        return value == null ? EMPTY : new Transient<>(value);
+    }
+
     protected Transient(Parcel ignored, boolean fromParcel) {
         this.value = null;
+    }
+
+    private Transient(T value) {
+        this.value = value;
     }
 
     @Override
@@ -65,7 +69,6 @@ public class Transient<T> implements Parcelable {
         Transient<?> that = (Transient<?>) o;
 
         return !(value != null ? !value.equals(that.value) : that.value != null);
-
     }
 
     @Override
