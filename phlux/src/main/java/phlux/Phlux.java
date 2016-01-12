@@ -82,6 +82,7 @@ public enum Phlux {
 
     private void put(String key, Scope scope) {
         root = with(root, key, scope);
+        callbacks = with(callbacks, key, Collections.<PhluxStateCallback>emptyList());
         for (Map.Entry<Integer, PhluxBackground> entry : scope.backgroundSticky.entrySet())
             execute(key, entry.getKey(), entry.getValue());
     }
