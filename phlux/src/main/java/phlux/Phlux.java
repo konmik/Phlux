@@ -96,12 +96,14 @@ public enum Phlux {
         entry.execute(new PhluxBackgroundCallback<S>() {
             @Override
             public void call(PhluxFunction<S> function) {
-                Scope scope = root.get(key);
-                boolean isUsual = scope.background.values().contains(entry);
-                if (isUsual)
-                    root = with(root, key, new Scope(scope.state, without(scope.background, id), scope.backgroundSticky));
-                if (isUsual || scope.backgroundSticky.values().contains(entry))
-                    apply(key, function);
+                if (root.containsKey(key)) {
+                    Scope scope = root.get(key);
+                    boolean isUsual = scope.background.values().contains(entry);
+                    if (isUsual)
+                        root = with(root, key, new Scope(scope.state, without(scope.background, id), scope.backgroundSticky));
+                    if (isUsual || scope.backgroundSticky.values().contains(entry))
+                        apply(key, function);
+                }
             }
         });
     }
