@@ -6,7 +6,7 @@ import java.util.UUID;
 
 /**
  * Represents an easy and type-safe access to {@link Phlux}.
- *
+ * <p>
  * {@link PhluxScope} represents internal state of a View.
  */
 public class PhluxScope<S extends PhluxState> {
@@ -56,12 +56,20 @@ public class PhluxScope<S extends PhluxState> {
 
     /**
      * Executes a background background.
-     *
+     * <p>
      * Sticky means that the request will not be removed after it's execution and will be re-executed
      * on a process termination.
      */
     public void background(int id, PhluxBackground<S> background, boolean sticky) {
         phlux.background(key, id, background, sticky);
+    }
+
+    /**
+     * Drops a background task.
+     * The task will be executed without interruption as usual, but it's application function will not be called.
+     */
+    public void drop(int id) {
+        phlux.drop(key, id);
     }
 
     /**

@@ -62,6 +62,11 @@ public enum Phlux {
         execute(key, id, task);
     }
 
+    public void drop(String key, int id) {
+        Scope scope = root.get(key);
+        root = with(root, key, new Scope(scope.state, without(scope.background, id), without(scope.backgroundSticky, id)));
+    }
+
     public void register(String key, PhluxStateCallback callback) {
         List<PhluxStateCallback> cs = callbacks.get(key);
         callbacks = with(callbacks, key, with(cs != null ? cs : Collections.<PhluxStateCallback>emptyList(), callback));
@@ -92,9 +97,11 @@ public enum Phlux {
             @Override
             public void call(PhluxFunction<S> function) {
                 Scope scope = root.get(key);
-                if (scope.background.values().contains(entry))
+                boolean isUsual = scope.background.values().contains(entry);
+                if (isUsual)
                     root = with(root, key, new Scope(scope.state, without(scope.background, id), scope.backgroundSticky));
-                apply(key, function);
+                if (isUsual || scope.backgroundSticky.values().contains(entry))
+                    apply(key, function);
             }
         });
     }
