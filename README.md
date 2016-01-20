@@ -157,7 +157,7 @@ I can create an application which has only *one* mutable variable!
 Overall, I feel that the library has a great potential. It is clearly better than MVP/C libraries.
 The library can potentially fit very well into MVVM but I do not care about data binding much).
 
-Currently I'm the library for one of my home projects.
+Currently I'm using the library for one of my home projects.
 
 ### TODO
 
