@@ -7,7 +7,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import base.ServerAPI;
-import info.android15.phluxexample.R;
+import info.android15.phlux.example.R;
 import phlux.base.PhluxActivity;
 
 public class MainActivity extends PhluxActivity<MainState> {
