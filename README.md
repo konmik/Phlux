@@ -157,6 +157,8 @@ I can create an application which has only *one* mutable variable!
 Overall, I feel that the library has a great potential. It is clearly better than MVP/C libraries.
 The library can potentially fit very well into MVVM but I do not care about data binding much).
 
+Currently I'm using the library for one of my home projects.
+
 ### TODO
 
 - In some cases we need to call background and UI tasks in a long sequence.
@@ -170,3 +172,5 @@ This is still a pain, so I think about implementing Interactor pattern on top of
 - 100% test coverage, as usual.
 
 - Docs? :D
+
+- Leverage new AutoValue plugin [with-](https://github.com/google/auto/issues/294) methods in the example when 2.0.0 will be released.
