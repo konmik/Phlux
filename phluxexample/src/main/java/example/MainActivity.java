@@ -6,9 +6,9 @@ import android.widget.CheckedTextView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import base.PhluxActivity;
 import base.ServerAPI;
 import info.android15.phluxexample.R;
+import phlux.base.PhluxActivity;
 
 public class MainActivity extends PhluxActivity<MainState> {
 
@@ -48,12 +48,12 @@ public class MainActivity extends PhluxActivity<MainState> {
     }
 
     @Override
-    protected MainState initial() {
+    public MainState initial() {
         return MainState.create();
     }
 
     @Override
-    protected void update(MainState state) {
+    public void update(MainState state) {
         part("tabs", state.name(), name -> {
             check1.setChecked(name.equals(MainState.NAME_1));
             check2.setChecked(name.equals(MainState.NAME_2));

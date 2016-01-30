@@ -19,11 +19,14 @@ buildscript {
 }
 
 apply plugin: 'com.android.application'
+// This does not break the build when Android Studio is missing the JRebel for Android plugin.
+apply plugin: 'com.zeroturnaround.jrebel.android'
 apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'me.tatarka.retrolambda'
 
 repositories {
     jcenter()
+    mavenLocal()
 }
 
 android {
@@ -45,7 +48,8 @@ android {
 }
 
 dependencies {
-    compile project(":phlux")
+    compile "info.android15.phlux:phlux:$VERSION_NAME"
+    compile "info.android15.phlux:phluxbase:$VERSION_NAME"
 
     compile 'io.reactivex:rxandroid:1.1.0'
     compile 'com.squareup.retrofit:retrofit:1.9.0'

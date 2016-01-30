@@ -34,13 +34,16 @@ public class PhluxViewAdapter<S extends PhluxState> {
         }
     }
 
-    public void onResume(boolean newView) {
+    public void resetParts() {
+        updated.clear();
+    }
+
+    public void onResume() {
         if (!registered) {
             scope.register(stateCallback);
             registered = true;
         }
-        else if (newView || updateAllOnResume) {
-            updated.clear();
+        else if (updateAllOnResume) {
             stateCallback.call(scope.state());
         }
     }

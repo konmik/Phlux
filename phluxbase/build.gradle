@@ -1,0 +1,26 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion rootProject.compileSdkVersion
+    buildToolsVersion rootProject.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.minSdkVersion
+        targetSdkVersion rootProject.targetSdkVersion
+    }
+}
+
+repositories {
+    mavenLocal()
+}
+
+configurations {
+    compileJavadoc
+}
+
+dependencies {
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile "info.android15.phlux:phlux:$VERSION_NAME"
+}
+
+apply from: '../gradle/gradle-mvn-push.gradle'
