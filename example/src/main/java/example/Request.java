@@ -4,6 +4,7 @@ import auto.parcel.AutoParcel;
 import base.App;
 import phlux.PhluxBackground;
 import phlux.PhluxBackgroundCallback;
+import phlux.PhluxBackgroundDismiss;
 import phlux.Transient;
 
 import static rx.android.schedulers.AndroidSchedulers.mainThread;
@@ -18,7 +19,7 @@ public abstract class Request implements PhluxBackground<MainState> {
     }
 
     @Override
-    public void execute(PhluxBackgroundCallback<MainState> callback) {
+    public void execute(PhluxBackgroundCallback<MainState> callback, PhluxBackgroundDismiss dismiss) {
         String firstName = name().split("\\s+")[0];
         String lastName = name().split("\\s+")[1];
         App.getServerAPI()

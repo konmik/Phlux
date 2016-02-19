@@ -95,8 +95,8 @@ public abstract class PhluxView<S extends PhluxState> extends FrameLayout implem
     }
 
     @Override
-    public void background(int id, PhluxBackground<S> background, boolean sticky) {
-        adapter.scope().background(id, background, sticky);
+    public void background(int id, PhluxBackground<S> background) {
+        adapter.scope().background(id, background);
     }
 
     @Override

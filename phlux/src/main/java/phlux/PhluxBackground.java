@@ -19,5 +19,5 @@ public interface PhluxBackground<S extends PhluxState> extends Parcelable {
      *                 The current implementation implies that the callback must be called
      *                 on the main thread.
      */
-    void execute(PhluxBackgroundCallback<S> callback);
+    void execute(PhluxBackgroundCallback<S> callback, PhluxBackgroundDismiss dismiss);
 }

@@ -14,7 +14,7 @@ public interface PhluxView<S extends PhluxState> {
 
     S state();
     void apply(PhluxFunction<S> function);
-    void background(int taskId, PhluxBackground<S> background, boolean sticky);
+    void background(int taskId, PhluxBackground<S> background);
     void drop(int taskId);
 
     /**

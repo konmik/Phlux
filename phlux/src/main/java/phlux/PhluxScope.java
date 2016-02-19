@@ -60,8 +60,8 @@ public class PhluxScope<S extends PhluxState> {
      * Sticky means that the request will not be removed after it's execution and will be re-executed
      * on a process termination.
      */
-    public void background(int id, PhluxBackground<S> background, boolean sticky) {
-        phlux.background(key, id, background, sticky);
+    public void background(int id, PhluxBackground<S> background) {
+        phlux.background(key, id, background);
     }
 
     /**

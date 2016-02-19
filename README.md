@@ -141,9 +141,6 @@ On Android background tasks must save their arguments to be restarted in case of
 So they must implement `Parcelable` as well.
 [PhluxBackground](https://github.com/konmik/Phlux/blob/master/phlux/src/main/java/phlux/PhluxBackground.java)
 
-Background tasks may have `sticky` property to automatically refresh temporary data when it gets lost during
-Android lifecycles.
-
 There is a problem: we somehow need to save the reference to a function that will start
 a background task from restored arguments.
 The problem has been solved by bundling the function with it's arguments into a single parcelable class.

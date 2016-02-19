@@ -37,14 +37,14 @@ public class MainActivity extends PhluxActivity<MainState> {
         listView.setAdapter(adapter = new ArrayAdapter<>(this, R.layout.item));
 
         if (savedInstanceState == null)
-            background(REQUEST_ID, Request.create(MainState.DEFAULT_NAME), true);
+            background(REQUEST_ID, Request.create(MainState.DEFAULT_NAME));
     }
 
     private void switchTo(final String name) {
         apply(state -> state.toBuilder()
             .name(name)
             .build());
-        background(REQUEST_ID, Request.create(name), true);
+        background(REQUEST_ID, Request.create(name));
     }
 
     @Override

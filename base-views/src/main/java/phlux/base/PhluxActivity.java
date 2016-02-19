@@ -48,8 +48,8 @@ public abstract class PhluxActivity<S extends PhluxState> extends AppCompatActiv
     }
 
     @Override
-    public void background(int taskId, PhluxBackground<S> background, boolean sticky) {
-        adapter.scope().background(taskId, background, sticky);
+    public void background(int taskId, PhluxBackground<S> background) {
+        adapter.scope().background(taskId, background);
     }
 
     @Override

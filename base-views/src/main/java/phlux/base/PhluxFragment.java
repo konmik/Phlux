@@ -55,8 +55,8 @@ public abstract class PhluxFragment<S extends PhluxState> extends Fragment imple
     }
 
     @Override
-    public void background(int id, PhluxBackground<S> background, boolean sticky) {
-        adapter.scope().background(id, background, sticky);
+    public void background(int id, PhluxBackground<S> background) {
+        adapter.scope().background(id, background);
     }
 
     @Override
