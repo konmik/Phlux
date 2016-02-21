@@ -177,6 +177,6 @@ This is still a pain, so I think about implementing Interactor pattern on top of
 
 - Docs? :D
 
-- STM multithreading support for state changes.
+- STM multithreading support for state changes. Race condition analysis.
 
 - Leverage the new AutoValue plugin [with-](https://github.com/google/auto/issues/294) methods in the example when 2.0.0 will be released.
