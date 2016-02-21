@@ -117,4 +117,13 @@ public abstract class PhluxView<S extends PhluxState> extends FrameLayout implem
     public <T> void part(String name, T newValue, FieldUpdater<T> updater) {
         adapter.part(name, newValue, updater);
     }
+
+    @Override
+    public void resetParts() {
+        adapter.resetParts();
+    }
+
+    @Override
+    public void onStateCreated(S state) {
+    }
 }

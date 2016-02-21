@@ -1,9 +1,14 @@
 package example;
 
+import android.util.Log;
+
+import java.util.concurrent.TimeUnit;
+
 import auto.parcel.AutoParcel;
 import base.App;
 import phlux.PhluxBackground;
 import phlux.PhluxBackgroundCallback;
+import phlux.PhluxBackgroundCancellable;
 import phlux.PhluxBackgroundDismiss;
 import phlux.Transient;
 
@@ -19,12 +24,14 @@ public abstract class Request implements PhluxBackground<MainState> {
     }
 
     @Override
-    public void execute(PhluxBackgroundCallback<MainState> callback, PhluxBackgroundDismiss dismiss) {
+    public PhluxBackgroundCancellable execute(PhluxBackgroundCallback<MainState> callback, PhluxBackgroundDismiss dismiss) {
         String firstName = name().split("\\s+")[0];
         String lastName = name().split("\\s+")[1];
-        App.getServerAPI()
+        return App.getServerAPI()
             .getItems(firstName, lastName)
+            .delay(10, TimeUnit.SECONDS)
             .observeOn(mainThread())
+            .doOnUnsubscribe(() -> Log.d("WTF", "unsubscribe"))
             .subscribe(
                 response ->
                     callback.call(state -> state.toBuilder()
@@ -33,6 +40,7 @@ public abstract class Request implements PhluxBackground<MainState> {
                 throwable ->
                     callback.call(state -> state.toBuilder()
                         .error(throwable.toString())
-                        .build()));
+                        .build()))
+            ::unsubscribe;
     }
 }

@@ -49,12 +49,12 @@ dependencies {
     compile "info.android15.phlux:phlux:$VERSION_NAME"
     compile "info.android15.phlux:base-views:$VERSION_NAME"
 
+    compile "io.reactivex:rxjava:$rootProject.rxVersion"
     compile 'io.reactivex:rxandroid:1.1.0'
     compile 'com.squareup.retrofit:retrofit:1.9.0'
 
+    compile 'com.android.support:appcompat-v7:23.1.1'
+
     compile 'com.github.frankiesardo:auto-parcel:0.3.1'
     apt 'com.github.frankiesardo:auto-parcel-processor:0.3.1'
-
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.1.1'
 }

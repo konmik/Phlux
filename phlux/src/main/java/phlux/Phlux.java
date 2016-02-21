@@ -22,7 +22,7 @@ public enum Phlux {
     private Map<String, List<PhluxStateCallback>> callbacks = Collections.emptyMap();
 
     public void create(String key, PhluxState initialState) {
-        put(key, new Scope(initialState, Collections.<Integer, PhluxBackground>emptyMap()));
+        put(key, new Scope(initialState, Collections.<Integer, PhluxBackground>emptyMap(), Collections.<Integer, PhluxBackgroundCancellable>emptyMap()));
     }
 
     public void restore(String key, Parcelable scope) {
@@ -47,7 +47,7 @@ public enum Phlux {
         if (root.containsKey(key)) {
             Scope scope = root.get(key);
             S newValue = function.call((S) scope.state);
-            root = with(root, key, new Scope(newValue, scope.background));
+            root = with(root, key, new Scope(newValue, scope.background, scope.cancellable));
 
             for (PhluxStateCallback callback : callbacks.get(key))
                 callback.call(newValue);
@@ -55,14 +55,16 @@ public enum Phlux {
     }
 
     public void background(String key, int id, PhluxBackground task) {
+        drop(key, id);
         Scope scope = root.get(key);
-        root = with(root, key, new Scope(scope.state, with(scope.background, id, task)));
-        execute(key, id, task);
+        root = with(root, key, new Scope(scope.state, with(scope.background, id, task), with(scope.cancellable, id, execute(key, id, task))));
     }
 
     public void drop(String key, int id) {
         Scope scope = root.get(key);
-        root = with(root, key, new Scope(scope.state, without(scope.background, id)));
+        if (scope.cancellable.containsKey(id))
+            scope.cancellable.get(id).cancel();
+        root = with(root, key, new Scope(scope.state, without(scope.background, id), without(scope.cancellable, id)));
     }
 
     public void register(String key, PhluxStateCallback callback) {
@@ -90,8 +92,8 @@ public enum Phlux {
             execute(key, entry.getKey(), entry.getValue());
     }
 
-    private <S extends PhluxState> void execute(final String key, final int id, final PhluxBackground<S> entry) {
-        entry.execute(new PhluxBackgroundCallback<S>() {
+    private <S extends PhluxState> PhluxBackgroundCancellable execute(final String key, final int id, final PhluxBackground<S> entry) {
+        return entry.execute(new PhluxBackgroundCallback<S>() {
             @Override
             public void call(PhluxFunction<S> function) {
                 if (root.containsKey(key)) {
@@ -103,7 +105,7 @@ public enum Phlux {
             public void call() {
                 if (root.containsKey(key)) {
                     Scope scope = root.get(key);
-                    root = with(root, key, new Scope(scope.state, without(scope.background, id)));
+                    root = with(root, key, new Scope(scope.state, without(scope.background, id), without(scope.cancellable, id)));
                 }
             }
         });
@@ -113,15 +115,18 @@ public enum Phlux {
 
         final PhluxState state;
         final Map<Integer, PhluxBackground> background;
+        final Map<Integer, PhluxBackgroundCancellable> cancellable;
 
-        Scope(PhluxState state, Map<Integer, PhluxBackground> background) {
+        Scope(PhluxState state, Map<Integer, PhluxBackground> background, Map<Integer, PhluxBackgroundCancellable> cancellable) {
             this.state = state;
             this.background = background;
+            this.cancellable = cancellable;
         }
 
         protected Scope(Parcel in) {
             state = in.readParcelable(PhluxState.class.getClassLoader());
             background = Collections.unmodifiableMap(in.readHashMap(PhluxState.class.getClassLoader()));
+            cancellable = Collections.emptyMap();
         }
 
         @Override
