@@ -19,10 +19,9 @@ public enum Phlux {
     INSTANCE;
 
     private Map<String, Scope> root = Collections.emptyMap();
-    private Map<String, List<PhluxStateCallback>> callbacks = Collections.emptyMap();
 
     public void create(String key, PhluxState initialState) {
-        put(key, new Scope(initialState, Collections.<Integer, PhluxBackground>emptyMap(), Collections.<Integer, PhluxBackgroundCancellable>emptyMap()));
+        put(key, new Scope(initialState));
     }
 
     public void restore(String key, Parcelable scope) {
@@ -41,7 +40,6 @@ public enum Phlux {
                 cancellable.cancel();
 
             root = without(root, key);
-            callbacks = without(callbacks, key);
         }
     }
 
@@ -53,9 +51,9 @@ public enum Phlux {
         if (root.containsKey(key)) {
             Scope scope = root.get(key);
             S newValue = function.call((S) scope.state);
-            root = with(root, key, new Scope(newValue, scope.background, scope.cancellable));
+            root = with(root, key, new Scope(newValue, scope.callbacks, scope.background, scope.cancellable));
 
-            for (PhluxStateCallback callback : callbacks.get(key))
+            for (PhluxStateCallback callback : scope.callbacks)
                 callback.call(newValue);
         }
     }
@@ -63,37 +61,40 @@ public enum Phlux {
     public void background(String key, int id, PhluxBackground task) {
         drop(key, id);
         Scope scope = root.get(key);
-        root = with(root, key, new Scope(scope.state, with(scope.background, id, task), with(scope.cancellable, id, execute(key, id, task))));
+        root = with(root, key, new Scope(scope.state, scope.callbacks, with(scope.background, id, task), with(scope.cancellable, id, execute(key, id, task))));
     }
 
     public void drop(String key, int id) {
         Scope scope = root.get(key);
         if (scope.cancellable.containsKey(id))
             scope.cancellable.get(id).cancel();
-        root = with(root, key, new Scope(scope.state, without(scope.background, id), without(scope.cancellable, id)));
+        root = with(root, key, new Scope(scope.state, scope.callbacks, without(scope.background, id), without(scope.cancellable, id)));
     }
 
     public void register(String key, PhluxStateCallback callback) {
-        List<PhluxStateCallback> cs = callbacks.get(key);
-        callbacks = with(callbacks, key, with(cs != null ? cs : Collections.<PhluxStateCallback>emptyList(), callback));
-        callback.call(root.get(key).state);
+        if (root.containsKey(key)) {
+            Scope scope = root.get(key);
+            root = with(root, key, new Scope(scope.state, with(scope.callbacks, callback), scope.background, scope.cancellable));
+            callback.call(scope.state);
+        }
     }
 
     public void unregister(String key, PhluxStateCallback callback) {
-        callbacks = with(callbacks, key, without(callbacks.get(key), callback));
+        if (root.containsKey(key)) {
+            Scope scope = root.get(key);
+            root = with(root, key, new Scope(scope.state, without(scope.callbacks, callback), scope.background, scope.cancellable));
+        }
     }
 
     @Override
     public String toString() {
         return "Phlux{" +
             "root=" + root +
-            ", callbacks=" + callbacks +
             '}';
     }
 
     private void put(String key, Scope scope) {
         root = with(root, key, scope);
-        callbacks = with(callbacks, key, Collections.<PhluxStateCallback>emptyList());
         for (Map.Entry<Integer, PhluxBackground> entry : scope.background.entrySet())
             execute(key, entry.getKey(), entry.getValue());
     }
@@ -111,7 +112,7 @@ public enum Phlux {
             public void call() {
                 if (root.containsKey(key)) {
                     Scope scope = root.get(key);
-                    root = with(root, key, new Scope(scope.state, without(scope.background, id), without(scope.cancellable, id)));
+                    root = with(root, key, new Scope(scope.state, scope.callbacks, without(scope.background, id), without(scope.cancellable, id)));
                 }
             }
         });
@@ -120,19 +121,29 @@ public enum Phlux {
     static class Scope implements Parcelable {
 
         final PhluxState state;
+        final List<PhluxStateCallback> callbacks;
         final Map<Integer, PhluxBackground> background;
         final Map<Integer, PhluxBackgroundCancellable> cancellable;
 
-        Scope(PhluxState state, Map<Integer, PhluxBackground> background, Map<Integer, PhluxBackgroundCancellable> cancellable) {
+        Scope(PhluxState state, List<PhluxStateCallback> callbacks, Map<Integer, PhluxBackground> background, Map<Integer, PhluxBackgroundCancellable> cancellable) {
             this.state = state;
+            this.callbacks = callbacks;
             this.background = background;
             this.cancellable = cancellable;
         }
 
+        Scope(PhluxState state) {
+            this.state = state;
+            this.callbacks = Collections.emptyList();
+            this.background = Collections.emptyMap();
+            this.cancellable = Collections.emptyMap();
+        }
+
         protected Scope(Parcel in) {
-            state = in.readParcelable(PhluxState.class.getClassLoader());
-            background = Collections.unmodifiableMap(in.readHashMap(PhluxState.class.getClassLoader()));
-            cancellable = Collections.emptyMap();
+            this.state = in.readParcelable(PhluxState.class.getClassLoader());
+            this.callbacks = Collections.emptyList();
+            this.background = Collections.unmodifiableMap(in.readHashMap(PhluxState.class.getClassLoader()));
+            this.cancellable = Collections.emptyMap();
         }
 
         @Override
@@ -162,7 +173,9 @@ public enum Phlux {
         public String toString() {
             return "Scope{" +
                 "state=" + state +
+                ", callbacks=" + callbacks +
                 ", background=" + background +
+                ", cancellable=" + cancellable +
                 '}';
         }
     }

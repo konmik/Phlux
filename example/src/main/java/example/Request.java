@@ -1,9 +1,5 @@
 package example;
 
-import android.util.Log;
-
-import java.util.concurrent.TimeUnit;
-
 import auto.parcel.AutoParcel;
 import base.App;
 import phlux.PhluxBackground;
@@ -29,9 +25,7 @@ public abstract class Request implements PhluxBackground<MainState> {
         String lastName = name().split("\\s+")[1];
         return App.getServerAPI()
             .getItems(firstName, lastName)
-            .delay(10, TimeUnit.SECONDS)
             .observeOn(mainThread())
-            .doOnUnsubscribe(() -> Log.d("WTF", "unsubscribe"))
             .subscribe(
                 response ->
                     callback.call(state -> state.toBuilder()

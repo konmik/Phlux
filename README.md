@@ -101,7 +101,12 @@ But do we really need tons of variables in each application? And, what is a mini
 of variables we can afford? How can we architect our apps to get most of the
 "minimum variables amout" principle?
 
-A Phlux-driven application can afford to have just two variables.
+A Phlux-driven application can afford to have just one variable.
+
+`AutoParcel` has a great support of the Builder pattern that allows to easily
+create copies of modified data structures. `Solid` allows to do the same with collections
+using streams. Java alone is not capable of applying this strategy, but with these two
+libraries the job can be done.
 
 *"But immutability comes with a price of increased garbage collection!"*
 
@@ -109,12 +114,17 @@ Not so bad, when we need to replace the root application variable we can referen
 parts of the previous root variable. What will be GC'ed is only the difference
 between two values which is not a problem. Be honest - who cares about reusing
 content of previous variables that was allocated for usage in an adapter? No one, we
-just drop them. The same is here, but we can do this in a much more reliable way.
+just drop them. The same is here, but now we can do this in a much more reliable way.
 
-`AutoParcel` has a great support of the Builder pattern that allows to easily
-create copies of modified data structures. `Solid` allows to do the same with collections
-using streams. Java alone is not capable of applying this strategy, but with these two
-libraries the job can be done.
+There is also a fact that not everybody consider when thinking about memory consumption.
+Java collections internally allocate new arrays and they silently drop old arrays
+of inappropriate size, so the memory consumption difference is even smaller than
+memory-consumption purists think.
+
+Overall, I only once had a problem caused by excessive memory consumption
+(I was allocating a few 4Mb images during scrolling,
+applying different graphical filters on them the same time).
+But I had tons of problems caused by mutable variables flying everywhere around.
 
 ### Data requirements
 
@@ -149,10 +159,9 @@ The problem has been solved by bundling the function with it's arguments into a 
 
 The library status is: "Wow, I can do this!".
 I can create an application which has only *one* mutable variable!
-(OK, there are *two* mutable variables - one for data and another one for the callback list.)
 
 Overall, I feel that the library has a great potential. It is clearly better than MVP/C libraries.
-The library can potentially fit very well into MVVM but I do not care about data binding much).
+The library can potentially fit very well into MVVM but I do not care about data binding much.
 
 Currently I'm using the library for one of my home projects.
 
@@ -164,10 +173,10 @@ show a dialog again, pass some data to server, etc. Things are worse because on 
 we can lost the current state and views easily, our dialogs can be dismissed without a user action, and so on.
 This is still a pain, so I think about implementing Interactor pattern on top of Phlux.
 
-- Dagger integration example.
-
 - 100% test coverage, as usual.
 
 - Docs? :D
 
-- Leverage new AutoValue plugin [with-](https://github.com/google/auto/issues/294) methods in the example when 2.0.0 will be released.
+- STM multithreading support for state changes.
+
+- Leverage the new AutoValue plugin [with-](https://github.com/google/auto/issues/294) methods in the example when 2.0.0 will be released.
