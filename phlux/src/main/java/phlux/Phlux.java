@@ -35,8 +35,14 @@ public enum Phlux {
     }
 
     public void remove(String key) {
-        root = without(root, key);
-        callbacks = without(callbacks, key);
+        if (root.containsKey(key)) {
+            Scope scope = root.get(key);
+            for (PhluxBackgroundCancellable cancellable : scope.cancellable.values())
+                cancellable.cancel();
+
+            root = without(root, key);
+            callbacks = without(callbacks, key);
+        }
     }
 
     public PhluxState state(String key) {
