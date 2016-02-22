@@ -66,10 +66,12 @@ so you can always rely on it.
 
 So now we have this one data structure and our function number does not increase so dramatically, we have even lesser
 amount of functions than we normally have. The interesting effect is that all of our functions now have a clear purpose -
-they either alter the data structure OR update a specific part of view.
+they either alter the data structure OR update a specific part of the view.
 
 Normally on Android our views are bloated with
-multi-purpose disorganized methods, with Phlux we have more control over methods,
+multi-purpose disorganized methods and variables, our background task management is a dark
+and unfriendly place that causes tons of troubles.
+With Phlux we have more control over methods,
 over data and over background tasks.
 
 ![Data Model](https://github.com/konmik/Phlux/blob/resources/doc/data_model.png)
