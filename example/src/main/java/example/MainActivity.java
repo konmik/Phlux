@@ -8,6 +8,7 @@ import android.widget.Toast;
 
 import base.ServerAPI;
 import info.android15.phlux.example.R;
+import phlux.PhluxScope;
 import phlux.base.PhluxActivity;
 
 public class MainActivity extends PhluxActivity<MainState> {
@@ -22,7 +23,6 @@ public class MainActivity extends PhluxActivity<MainState> {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setUpdateAllOnResume(true);
 
         check1 = (CheckedTextView) findViewById(R.id.check1);
         check2 = (CheckedTextView) findViewById(R.id.check2);
@@ -35,16 +35,19 @@ public class MainActivity extends PhluxActivity<MainState> {
 
         ListView listView = (ListView) findViewById(R.id.listView);
         listView.setAdapter(adapter = new ArrayAdapter<>(this, R.layout.item));
+    }
 
-        if (savedInstanceState == null)
-            background(REQUEST_ID, Request.create(MainState.DEFAULT_NAME));
+    @Override
+    public void onScopeCreated(PhluxScope<MainState> scope) {
+        super.onScopeCreated(scope);
+        scope.background(REQUEST_ID, Request.create(MainState.DEFAULT_NAME));
     }
 
     private void switchTo(final String name) {
-        apply(state -> state.toBuilder()
+        scope().apply(state -> state.toBuilder()
             .name(name)
             .build());
-        background(REQUEST_ID, Request.create(name));
+        scope().background(REQUEST_ID, Request.create(name));
     }
 
     @Override
@@ -72,7 +75,7 @@ public class MainActivity extends PhluxActivity<MainState> {
     }
 
     private void removeError() {
-        apply(s -> s.toBuilder()
+        scope().apply(s -> s.toBuilder()
             .error(null)
             .build());
     }

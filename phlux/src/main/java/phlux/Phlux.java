@@ -75,7 +75,6 @@ public enum Phlux {
         if (root.containsKey(key)) {
             Scope scope = root.get(key);
             root = with(root, key, new Scope(scope.state, with(scope.callbacks, callback), scope.background, scope.cancellable));
-            callback.call(scope.state);
         }
     }
 

@@ -5,11 +5,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.View;
 
-import phlux.PhluxBackground;
-import phlux.PhluxFunction;
 import phlux.PhluxScope;
 import phlux.PhluxState;
-import phlux.PhluxStateCallback;
 import phlux.PhluxView;
 import phlux.PhluxViewAdapter;
 
@@ -20,27 +17,13 @@ public abstract class PhluxFragment<S extends PhluxState> extends Fragment imple
 
     private static final String PHLUX_SCOPE = "phlux_scope";
 
-    private PhluxViewAdapter<S> adapter;
-    private PhluxStateCallback<S> phluxStateCallback = new PhluxStateCallback<S>() {
-        @Override
-        public void call(S state) {
-            update(state);
-        }
-    };
+    private final PhluxViewAdapter<S> adapter = new PhluxViewAdapter<>(this);
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null)
-            adapter = new PhluxViewAdapter<>(new PhluxScope<S>(savedInstanceState.getBundle(PHLUX_SCOPE)), phluxStateCallback);
-        else {
-            adapter = new PhluxViewAdapter<>(new PhluxScope<>(initial()), phluxStateCallback);
-            onStateCreated(adapter.scope().state());
-        }
-    }
-
-    @Override
-    public void onStateCreated(S state) {
+            adapter.onRestore(savedInstanceState.getBundle(PHLUX_SCOPE));
     }
 
     @Override
@@ -50,27 +33,17 @@ public abstract class PhluxFragment<S extends PhluxState> extends Fragment imple
     }
 
     @Override
-    public void apply(PhluxFunction<S> function) {
-        adapter.scope().apply(function);
-    }
-
-    @Override
-    public void background(int id, PhluxBackground<S> background) {
-        adapter.scope().background(id, background);
-    }
-
-    @Override
-    public void drop(int taskId) {
-        adapter.scope().drop(taskId);
-    }
-
-    public void setUpdateAllOnResume(boolean update) {
-        adapter.setUpdateAllOnResume(update);
+    public PhluxScope<S> scope() {
+        return adapter.scope();
     }
 
     @Override
     public S state() {
         return adapter.scope().state();
+    }
+
+    @Override
+    public void onScopeCreated(PhluxScope<S> state) {
     }
 
     @Override

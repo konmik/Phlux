@@ -55,11 +55,22 @@ This schema represents the Phlux data flow. Whenever an action occurs (be it a b
 completion or an UI event) it applies to *State* and then *View* should automatically
 be updated from the new *State* instance.
 
-Phlux automatically manages updates and background task connections.
-
 When the application needs to update a view it should ask Phlux to `apply()` a function to the corresponding state.
 Phlux manages all the internal stuff to avoid any data modification. The only variable that gets changed after
 the called function is *Phlux Root*.
+
+The main idea about this schema is that it is data-centric. And the data is immutable and parcelable,
+so you can always rely on it.
+
+"It is better to have 100 functions operate on one data structure than 10 functions on 10 data structures." — Alan Perlis
+
+So now we have this one data structure and our function number does not increase so dramatically, we have even lesser
+amount of functions than we normally have. The interesting effect is that all of our functions now have a clear purpose -
+they either alter the data structure OR update a specific part of view.
+
+Normally on Android our views are bloated with
+multi-purpose disorganized methods, with Phlux we have more control over methods,
+over data and over background tasks.
 
 ![Data Model](https://github.com/konmik/Phlux/blob/resources/doc/data_model.png)
 
@@ -126,6 +137,20 @@ Overall, I only once had a problem caused by excessive memory consumption
 applying different graphical filters on them the same time).
 But I had tons of problems caused by mutable variables flying everywhere around.
 
+### Lifecycle goals
+
+One of Phlux purposes is to eliminate the need in lifecycle handling.
+All excessive lifecycle events have been replaced by the generalization of three.
+Once created, the view state will be persisted and restores automatically,
+so developers will be freed of dealing with configuration changes
+and process restorations. You will rarely need most of lifecycle methods.
+
+Activity will have just `onCreate`, `onScopeCreated` and `onUpdate` methods.
+During `onCreate` you will need to initialize the usual activity visual parts and UI callbacks,
+`onScopeCreated` is the place where you start background tasks for the first time
+(they will be auto-connected and restarted automatically),
+and `onUpdate` is where you're updating your activity from the activity state.
+
 ### Data requirements
 
 Most data in a Phlux application must implement `Parcelable` interface.
@@ -163,7 +188,8 @@ I can create an application which has only *one* mutable variable!
 Overall, I feel that the library has a great potential. It is clearly better than MVP/C libraries.
 The library can potentially fit very well into MVVM but I do not care about data binding much.
 
-Currently I'm using the library for one of my home projects.
+Currently I'm using the library for one of my home projects
+with multiple activities, fragments, dialogs and background tasks.
 
 ### TODO
 

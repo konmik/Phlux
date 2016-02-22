@@ -1,6 +1,8 @@
 package phlux;
 
-import java.util.LinkedHashMap;
+import android.os.Bundle;
+
+import java.util.HashMap;
 
 /**
  * PhluxViewAdapter incorporates common view logic.
@@ -8,22 +10,35 @@ import java.util.LinkedHashMap;
  */
 public class PhluxViewAdapter<S extends PhluxState> {
 
+    private final PhluxView<S> view;
+    private final PhluxStateCallback<S> callback = new PhluxStateCallback<S>() {
+        @Override
+        public void call(S state) {
+            view.update(state);
+        }
+    };
     private PhluxScope<S> scope;
-    private boolean registered;
-    private PhluxStateCallback<S> stateCallback;
-    private LinkedHashMap<String, Object> updated = new LinkedHashMap<>();
-    private boolean updateAllOnResume;
 
-    public PhluxViewAdapter(PhluxScope<S> scope, PhluxStateCallback<S> stateCallback) {
-        this.scope = scope;
-        this.stateCallback = stateCallback;
+    private HashMap<String, Object> updated = new HashMap<>();
+    private boolean firstOnResume = true;
+
+    public PhluxViewAdapter(PhluxView<S> view) {
+        this.view = view;
     }
 
-    public void setUpdateAllOnResume(boolean update) {
-        this.updateAllOnResume = update;
+    public void onRestore(Bundle bundle) {
+        if (scope != null)
+            throw new IllegalStateException("onRestore() must be called before scope() and before onResume()");
+        scope = new PhluxScope<>(bundle);
+        scope.register(callback);
     }
 
     public PhluxScope<S> scope() {
+        if (scope == null) {
+            scope = new PhluxScope<>(view.initial());
+            scope.register(callback);
+            view.onScopeCreated(scope);
+        }
         return scope;
     }
 
@@ -39,19 +54,16 @@ public class PhluxViewAdapter<S extends PhluxState> {
     }
 
     public void onResume() {
-        if (!registered) {
-            scope.register(stateCallback);
-            registered = true;
-        }
-        else if (updateAllOnResume) {
-            stateCallback.call(scope.state());
+        if (firstOnResume) {
+            view.update(scope().state());
+            firstOnResume = false;
         }
     }
 
     public void onDestroy() {
-        if (registered) {
-            scope.unregister(stateCallback);
-            registered = false;
+        if (scope != null) {
+            scope.unregister(callback);
+            scope = null;
         }
     }
 }

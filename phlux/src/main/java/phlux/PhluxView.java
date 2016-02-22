@@ -13,9 +13,7 @@ public interface PhluxView<S extends PhluxState> {
     }
 
     S state();
-    void apply(PhluxFunction<S> function);
-    void background(int taskId, PhluxBackground<S> background);
-    void drop(int taskId);
+    PhluxScope<S> scope();
 
     /**
      * Incorporates updating logic for a visual part of an activity,
@@ -37,10 +35,10 @@ public interface PhluxView<S extends PhluxState> {
     void resetParts();
 
     /**
-     * onStateCreated is called when state was created for the first time.
+     * onScopeCreated is called when scope and state was created for the first time.
      * This is a good place to initialize background tasks.
      */
-    void onStateCreated(S state);
+    void onScopeCreated(PhluxScope<S> scope);
 
     /**
      * Creates an initial state.

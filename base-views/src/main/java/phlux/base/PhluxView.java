@@ -12,7 +12,6 @@ import phlux.PhluxBackground;
 import phlux.PhluxFunction;
 import phlux.PhluxScope;
 import phlux.PhluxState;
-import phlux.PhluxStateCallback;
 import phlux.PhluxViewAdapter;
 
 /**
@@ -23,13 +22,7 @@ public abstract class PhluxView<S extends PhluxState> extends FrameLayout implem
     private static final String PHLUX_SCOPE = "phlux_scope";
     private static final String SUPER = "super";
 
-    private PhluxViewAdapter<S> adapter;
-    private PhluxStateCallback<S> phluxStateCallback = new PhluxStateCallback<S>() {
-        @Override
-        public void call(S state) {
-            update(state);
-        }
-    };
+    private final PhluxViewAdapter<S> adapter = new PhluxViewAdapter<>(this);
 
     public PhluxView(Context context) {
         super(context);
@@ -50,8 +43,7 @@ public abstract class PhluxView<S extends PhluxState> extends FrameLayout implem
         if (isInEditMode())
             return;
 
-        if (adapter == null)
-            adapter = new PhluxViewAdapter<>(new PhluxScope<>(initial()), phluxStateCallback);
+        adapter.onResume();
     }
 
     @Override
@@ -62,14 +54,13 @@ public abstract class PhluxView<S extends PhluxState> extends FrameLayout implem
             adapter.scope().remove();
         }
         adapter.onDestroy();
-        adapter = null;
     }
 
     @Override
     protected void onRestoreInstanceState(Parcelable state) {
         Bundle bundle = (Bundle) state;
         super.onRestoreInstanceState(bundle.getParcelable(SUPER));
-        adapter = new PhluxViewAdapter<>(new PhluxScope<S>(bundle.getBundle(PHLUX_SCOPE)), phluxStateCallback);
+        adapter.onRestore(bundle.getBundle(PHLUX_SCOPE));
     }
 
     @Override
@@ -90,22 +81,8 @@ public abstract class PhluxView<S extends PhluxState> extends FrameLayout implem
     }
 
     @Override
-    public void apply(PhluxFunction<S> function) {
-        adapter.scope().apply(function);
-    }
-
-    @Override
-    public void background(int id, PhluxBackground<S> background) {
-        adapter.scope().background(id, background);
-    }
-
-    @Override
-    public void drop(int taskId) {
-        adapter.scope().drop(taskId);
-    }
-
-    public void setUpdateAllOnResume(boolean update) {
-        adapter.setUpdateAllOnResume(update);
+    public PhluxScope<S> scope() {
+        return adapter.scope();
     }
 
     @Override
@@ -124,6 +101,6 @@ public abstract class PhluxView<S extends PhluxState> extends FrameLayout implem
     }
 
     @Override
-    public void onStateCreated(S state) {
+    public void onScopeCreated(PhluxScope<S> state) {
     }
 }

@@ -3,11 +3,8 @@ package phlux.base;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-import phlux.PhluxBackground;
-import phlux.PhluxFunction;
 import phlux.PhluxScope;
 import phlux.PhluxState;
-import phlux.PhluxStateCallback;
 import phlux.PhluxView;
 import phlux.PhluxViewAdapter;
 
@@ -18,22 +15,13 @@ public abstract class PhluxActivity<S extends PhluxState> extends AppCompatActiv
 
     private static final String PHLUX_SCOPE = "phlux_scope";
 
-    private PhluxViewAdapter<S> adapter;
-    private PhluxStateCallback<S> phluxStateCallback = new PhluxStateCallback<S>() {
-        @Override
-        public void call(S state) {
-            update(state);
-        }
-    };
+    private final PhluxViewAdapter<S> adapter = new PhluxViewAdapter<>(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        adapter = new PhluxViewAdapter<>(
-            savedInstanceState == null ?
-                new PhluxScope<>(initial()) :
-                new PhluxScope<S>(savedInstanceState.getBundle(PHLUX_SCOPE)),
-            phluxStateCallback);
+        if (savedInstanceState != null)
+            adapter.onRestore(savedInstanceState.getBundle(PHLUX_SCOPE));
     }
 
     public void post(Runnable runnable) {
@@ -43,22 +31,8 @@ public abstract class PhluxActivity<S extends PhluxState> extends AppCompatActiv
     }
 
     @Override
-    public void apply(PhluxFunction<S> function) {
-        adapter.scope().apply(function);
-    }
-
-    @Override
-    public void background(int taskId, PhluxBackground<S> background) {
-        adapter.scope().background(taskId, background);
-    }
-
-    @Override
-    public void drop(int taskId) {
-        adapter.scope().drop(taskId);
-    }
-
-    public void setUpdateAllOnResume(boolean update) {
-        adapter.setUpdateAllOnResume(update);
+    public PhluxScope<S> scope() {
+        return adapter.scope();
     }
 
     @Override
@@ -77,7 +51,7 @@ public abstract class PhluxActivity<S extends PhluxState> extends AppCompatActiv
     }
 
     @Override
-    public void onStateCreated(S state) {
+    public void onScopeCreated(PhluxScope<S> state) {
     }
 
     @Override

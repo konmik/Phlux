@@ -7,7 +7,8 @@ import java.util.UUID;
 /**
  * Represents an easy and type-safe access to {@link Phlux}.
  * <p>
- * {@link PhluxScope} represents internal state of a View.
+ * {@link PhluxScope} is an interface to access internal state of a View,
+ * including its background tasks and callbacks.
  */
 public class PhluxScope<S extends PhluxState> {
 
