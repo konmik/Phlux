@@ -43,7 +43,7 @@ public abstract class PhluxFragment<S extends PhluxState> extends Fragment imple
     }
 
     @Override
-    public void onScopeCreated(PhluxScope<S> state) {
+    public void onScopeCreated(PhluxScope<S> scope) {
     }
 
     @Override

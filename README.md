@@ -91,14 +91,14 @@ damn library so I could just relax and write reliable apps easily?)
 
 ### Why functional
 
-Functional programming is a programming style/language that is based on two practicies:
+Functional programming is a programming style/language that is based on two practices:
 
-- Code composition by passing references to functons (lambdas) into other functions.
+- Code composition by passing references to functions (lambdas) into other functions.
 - Immutable data.
 
 First point is out of the current interest.
 
-The second point is unbelievable important for good archivecture and application simplicity.
+The second point is unbelievable important for good architecture and application simplicity.
 Every variable we have needs a special treating. We must constantly care about variables to
 have values that correspond to other values in the application. We need to keep eye on the
 order of variable initialization and changes. Every variable we have adds complexity.
@@ -108,9 +108,9 @@ in it and we've got troubles.
 In a multi-threading environment this complexity becomes stunning.
 
 MVP/C architecture does not scale well just because of this single reason - uncontrolled and
-unpredictable propagation of changes across applcation.
+unpredictable propagation of changes across application.
 
-But do we really need tons of variables in each application? And, what is a minimun amount
+But do we really need tons of variables in each application? And, what is a minimum amount
 of variables we can afford? How can we architect our apps to get most of the
 "minimum variables amout" principle?
 

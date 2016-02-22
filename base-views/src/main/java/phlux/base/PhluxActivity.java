@@ -51,7 +51,7 @@ public abstract class PhluxActivity<S extends PhluxState> extends AppCompatActiv
     }
 
     @Override
-    public void onScopeCreated(PhluxScope<S> state) {
+    public void onScopeCreated(PhluxScope<S> scope) {
     }
 
     @Override

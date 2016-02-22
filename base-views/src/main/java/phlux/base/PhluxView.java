@@ -101,6 +101,6 @@ public abstract class PhluxView<S extends PhluxState> extends FrameLayout implem
     }
 
     @Override
-    public void onScopeCreated(PhluxScope<S> state) {
+    public void onScopeCreated(PhluxScope<S> scope) {
     }
 }
