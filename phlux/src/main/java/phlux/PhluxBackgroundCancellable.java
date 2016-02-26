@@ -2,7 +2,7 @@ package phlux;
 
 public interface PhluxBackgroundCancellable {
 
-    PhluxBackgroundCancellable EMPTY = new PhluxBackgroundCancellable() {
+    PhluxBackgroundCancellable NOOP = new PhluxBackgroundCancellable() {
         @Override
         public void cancel() {
         }

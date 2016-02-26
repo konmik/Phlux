@@ -5,7 +5,6 @@ import base.App;
 import phlux.PhluxBackground;
 import phlux.PhluxBackgroundCallback;
 import phlux.PhluxBackgroundCancellable;
-import phlux.PhluxBackgroundDismiss;
 import phlux.Transient;
 
 import static rx.android.schedulers.AndroidSchedulers.mainThread;
@@ -20,7 +19,7 @@ public abstract class Request implements PhluxBackground<MainState> {
     }
 
     @Override
-    public PhluxBackgroundCancellable execute(PhluxBackgroundCallback<MainState> callback, PhluxBackgroundDismiss dismiss) {
+    public PhluxBackgroundCancellable execute(PhluxBackgroundCallback<MainState> callback) {
         String firstName = name().split("\\s+")[0];
         String lastName = name().split("\\s+")[1];
         return App.getServerAPI()
@@ -28,11 +27,11 @@ public abstract class Request implements PhluxBackground<MainState> {
             .observeOn(mainThread())
             .subscribe(
                 response ->
-                    callback.call(state -> state.toBuilder()
+                    callback.apply(state -> state.toBuilder()
                         .items(Transient.of(response.items))
                         .build()),
                 throwable ->
-                    callback.call(state -> state.toBuilder()
+                    callback.apply(state -> state.toBuilder()
                         .error(throwable.toString())
                         .build()))
             ::unsubscribe;

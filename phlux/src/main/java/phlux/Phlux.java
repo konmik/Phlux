@@ -101,14 +101,14 @@ public enum Phlux {
     private <S extends PhluxState> PhluxBackgroundCancellable execute(final String key, final int id, final PhluxBackground<S> entry) {
         return entry.execute(new PhluxBackgroundCallback<S>() {
             @Override
-            public void call(PhluxFunction<S> function) {
+            public void apply(PhluxFunction<S> function) {
                 if (root.containsKey(key)) {
-                    apply(key, function);
+                    Phlux.this.apply(key, function);
                 }
             }
-        }, new PhluxBackgroundDismiss() {
+
             @Override
-            public void call() {
+            public void dismiss() {
                 if (root.containsKey(key)) {
                     Scope scope = root.get(key);
                     root = with(root, key, new Scope(scope.state, scope.callbacks, without(scope.background, id), without(scope.cancellable, id)));
