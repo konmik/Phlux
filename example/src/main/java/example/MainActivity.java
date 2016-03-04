@@ -1,5 +1,6 @@
 package example;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.CheckedTextView;
@@ -23,6 +24,8 @@ public class MainActivity extends PhluxActivity<MainState> {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        findViewById(R.id.thread_demo).setOnClickListener(v -> startActivity(new Intent(this, DemoActivity.class)));
 
         check1 = (CheckedTextView) findViewById(R.id.check1);
         check2 = (CheckedTextView) findViewById(R.id.check2);
