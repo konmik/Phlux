@@ -7,37 +7,42 @@ It is inspired by Clojure and Facebook Flux.
 
 ### Why Phlux?
 
-1. The original Flux architecture has too many boxes and arrows.
-All that dispatchers, stores - this is too complex for Android apps.
-Phlux leverages the power of the KISS principle.
+##### Why not MVP
+
+1. Android has troubles with background task continuation, so the architecture
+must be ready for stress conditions
+(wiping out background tasks and static variables is one of such conditions).
+Phlux handles background tasks and it does it even better than any MVP/C implementation.
+Forget about memory leaks, lost data and simultaneously running requests.
+
+2. Immutable data is a key ingredient in building reliable software.
+All data in Phlux is immutable. Unlike MVP/C/VM libraries,
+Phlux requires to use immutable data to manage view state and to implement background tasks.
+Reliability of a Phlux-driven application is outstanding.
+
+3. Despite MVP/C libraries reduce the pain of Android lifecycles,
+there are still some lifecycles and there is still some pain.
+Phlux allows to forget about Android lifecycles even more.
+
+##### Why not Flux
+
+1. The original Flux architecture has dispatcher we don't need on Android.
+And even if we will implement it - it will work really bad because of lifecycles.
+If you *really* need a dispatcher it can be easily implemented on top of Phlux.
 
 2. Unlike Flux, we don't have React library for our views.
 Creating and supporting a such library requires a great amount of time investment.
 Phlux does not require such library.
 
-3. Android has troubles with background task continuation, so the architecture
-must be ready for stress conditions.
-(wiping out background tasks and static variables is one of such conditions).
-Phlux handles lifecycle problems and it does it even better than any MVP/C implementation.
-
-4. Immutable data is a key ingredient in building reliable software.
-All data in Phlux is immutable. Unlike MVP/C/VM libraries,
-Phlux requires to use immutable data.
-
-5. We can *update* views instead of re-creating them. Sure, this is not as
+3. We can *update* views instead of re-creating them. Sure, this is not as
 "functional" as some of us want, but it is a good compromise. Android XML tools
 are quite good and I personally don't want to lose them.
-Phlux allows to use the current workflow and unlike
-Flux, it does not require to hardcode all views.
+Phlux allows to use the current workflow and it does not require to hardcode all views.
 
-6. Despite MVP/C libraries reduce the pain of Android lifecycles,
-there are still some lifecycles and there is still some pain.
-Phlux allows to forget about Android lifecycles even more!
-
-7. Get ready for [Hot Code Swapping](https://www.youtube.com/watch?v=YYin_N6xXxQ&feature=youtu.be&t=37m32s)!
+##### More pros
 
 So I decided to implement a simplified version of Flux that
-is more Android-friendly and allows to call `view.update(immutableState)`
+is more Android-friendly and allows to call `view.update(viewState)`
 at the end of all.
 
 `update` Looks like a ViewHolder's method, isn't it?
@@ -62,11 +67,6 @@ the called function is *Phlux Root*.
 The main idea about this schema is that it is data-centric. And the data is immutable and parcelable,
 so you can always rely on it.
 
-`apply()` must not have side effects. It can be called multiple times.
-Phlux uses "software transactional memory"
-(`root.compareAndSet(originalRoot, newRoot)`)
-to apply root variable to provide maximum performance and reliability.
-
 "It is better to have 100 functions operate on one data structure than 10 functions on 10 data structures." — Alan Perlis
 
 So now we have this one data structure and our function number does not increase so dramatically, we have even lesser
@@ -76,21 +76,24 @@ they either alter the data structure OR update a specific part of the view.
 Normally on Android our views are bloated with
 multi-purpose disorganized methods and variables, our background task management is a dark
 and unfriendly place that causes tons of troubles.
+Our data is partially parcelable and partially not, we save different values
+and get NPEs because our data is not in sync with lifecycles.
 With Phlux we have more control over methods,
 over data and over background tasks.
 
 ![Data Model](https://github.com/konmik/Phlux/blob/resources/doc/data_model.png)
 
-This is the Phlux data model. It is extremely simple.
+This is the Phlux data model. It is simple.
 
 Phlux has root, it is just `Map<String, Scope>`.
 Every *Scope* has a state of a corresponding *View*.
 Every *Scope* also has a list of current background tasks.
+Key is a randomly generated string that binds view to its state.
 
 Whenever a process gets wiped out Phlux automatically restores scopes
 and relaunches their tasks that did not complete yet.
 
-The entire architecture is so simple (14Kb jar), it is hard to believe that
+The entire architecture is so simple, it is hard to believe that
 no one have it implemented like this yet (if you have, then why didn't you release the
 damn library so I could just relax and write reliable apps easily?)
 
@@ -187,24 +190,49 @@ There is a problem: we somehow need to save the reference to a function that wil
 a background task from restored arguments.
 The problem has been solved by bundling the function with it's arguments into a single parcelable class.
 
+### A little note on `apply()` and multithreading
+
+The `apply(function)` call is atomic and thread-safe.
+It is implemented by using (simplified)
+`rootReference.compareAndSet(originalRoot, originalRoot.withViewState(function(viewState)))`.
+If another thread tries to alter the root during a `function` call then `apply()` will be retried.
+
+This technique is similar to "Software Transactional Memory". It provides lock and callback free
+multithreading capabilities for maximum performance and reliability.
+
+It is important that your `function` must not change external variables - it can be called multiple
+times so having external variables changed can cause unpredictable results.
+`apply()` function returns both - previous and applied values, so you can take an action depending on what happened during the transaction.
+This is rarely needed, though.
+
+After a successful `apply()` execution a callback will be fired on the main thread.
+If several modifications occur the same time then some of callbacks can be skipped, the last one is guaranteed to be fired anyway.
+This prevents flooding of the main thread with callbacks that can't be processed fast enough.
+
+### Why no RxJava
+
+My previous architecture solutions was based on RxJava, however Phlux does not have such dependency.
+There are two reasons for this:
+
+- It is hard for newcomers to dive into RxJava *and* a new architecture the same time.
+- Phlux is so simple that it has only one callback. RxJava will be an overkill here.
+
+While Phlux does not require RxJava, it can be easily used with Phlux.
+Normally I use it to process some of UI actions and all background tasks.
+
+RxJava can be naturally used to substitute *dispatcher* on the original Flux diagram.
+
 ### Library status
 
-The library status is: "Wow, I can do this!".
-I can create an application which has only *one* mutable variable!
-
-Overall, I feel that the library has a great potential. It is clearly better than MVP/C libraries.
-The library can potentially fit very well into MVVM but I do not care about data binding much.
+The library in active development.
 
 Currently I'm using the library for one of my home projects
 with multiple activities, fragments, dialogs and background tasks.
 
-### TODO
+Overall, I feel that the library has a great potential. It is clearly better than MVP/C libraries.
+The library can potentially fit very well into MVVM but I do not care about data binding much.
 
-- In some cases we need to call background and UI tasks in a long sequence.
-Show a dialog, execute a background task, choose some data from an activity,
-show a dialog again, pass some data to server, etc. Things are worse because on Android
-we can lost the current state and views easily, our dialogs can be dismissed without a user action, and so on.
-This is still a pain, so I think about implementing Interactor pattern on top of Phlux.
+### TODO
 
 - 100% test coverage, as usual.
 
@@ -212,4 +240,4 @@ This is still a pain, so I think about implementing Interactor pattern on top of
 
 - Race condition analysis.
 
-- Leverage the new AutoValue plugin [with-](https://github.com/google/auto/issues/294) methods in the example when 2.0.0 will be released.
+- Leverage the new AutoValue plugin [with-](https://github.com/google/auto/issues/294) methods in the example when 1.2 will be released.

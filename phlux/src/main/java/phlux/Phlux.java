@@ -4,6 +4,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -72,6 +73,7 @@ public enum Phlux {
         }
     }
 
+    @Nullable
     public <S extends PhluxState> PhluxApplyResult<S> apply(final String key, final PhluxFunction<S> function) {
         ScopeTransactionResult result = swapScope(key, new ScopeTransaction() {
             @Override
@@ -81,7 +83,7 @@ public enum Phlux {
         });
         if (result.now != null)
             callback(key, result.now);
-        return new PhluxApplyResult(result.prev == null ? null : result.prev.state, result.now == null ? null : result.now.state);
+        return result.prev == null ? null : new PhluxApplyResult(result.prev.state, result.now.state);
     }
 
     public void background(String key, final int id, final PhluxBackground task) {
