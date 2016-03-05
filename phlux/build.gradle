@@ -7,6 +7,7 @@ android {
     defaultConfig {
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.targetSdkVersion
+        testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
     }
 }
 
@@ -16,6 +17,11 @@ configurations {
 
 dependencies {
     compile "com.android.support:support-annotations:$rootProject.supportLibraryVersion"
+
+    androidTestCompile 'junit:junit:4.12'
+    androidTestCompile("com.android.support.test:runner:0.4") {
+        exclude group: "com.android.support"
+    }
 }
 
 android.libraryVariants.all { variant ->
