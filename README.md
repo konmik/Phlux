@@ -41,7 +41,7 @@ must be ready for stress conditions
 Phlux handles background tasks and it does it even better than any MVP/C implementation.
 Forget about memory leaks, lost data and simultaneously running requests.
 
-Phlux is more Android-friendly and allows to call `view.update(viewState)`
+Phlux is Android-friendly, it allows to call `view.update(viewState)`
 at the end of all.
 
 `update` Looks like a ViewHolder's method, isn't it?
