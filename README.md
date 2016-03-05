@@ -18,6 +18,12 @@ Reliability of a Phlux-driven application is outstanding.
 there are still some lifecycles and there is still some pain.
 Phlux allows to forget about Android lifecycles even more.
 
+3. Android has troubles with background task continuation, so the application architecture
+must be ready for stress conditions
+(wiping out background tasks and static variables is one of such conditions).
+Phlux handles background tasks much better than any MVP/C implementation.
+Forget about memory leaks, lost data and simultaneously running requests.
+
 ##### Why not Flux
 
 1. The original Flux architecture has dispatcher we don't need on Android.
@@ -33,20 +39,12 @@ Phlux does not require such library.
 are quite good and I personally don't want to lose them.
 Phlux allows to use the current workflow and it does not require to hardcode all views.
 
-##### More pros
-
-Android has troubles with background task continuation, so the architecture
-must be ready for stress conditions
-(wiping out background tasks and static variables is one of such conditions).
-Phlux handles background tasks and it does it even better than any MVP/C implementation.
-Forget about memory leaks, lost data and simultaneously running requests.
-
 Phlux is Android-friendly, it allows to call `view.update(viewState)`
 at the end of all.
 
 `update` Looks like a ViewHolder's method, isn't it?
 A ViewHolder does not have many variables in it
-(it must not have variables at all if you're doing everything properly).
+(it must not have any variables at all if you're doing everything properly).
 So how about turning your entire activity into a simple ViewHolder?
 
 ### Schema
