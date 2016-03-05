@@ -9,18 +9,12 @@ It is inspired by Clojure and Facebook Flux.
 
 ##### Why not MVP
 
-1. Android has troubles with background task continuation, so the architecture
-must be ready for stress conditions
-(wiping out background tasks and static variables is one of such conditions).
-Phlux handles background tasks and it does it even better than any MVP/C implementation.
-Forget about memory leaks, lost data and simultaneously running requests.
-
-2. Immutable data is a key ingredient in building reliable software.
+1. Immutable data is a key ingredient in building reliable software.
 All data in Phlux is immutable. Unlike MVP/C/VM libraries,
 Phlux requires to use immutable data to manage view state and to implement background tasks.
 Reliability of a Phlux-driven application is outstanding.
 
-3. Despite MVP/C libraries reduce the pain of Android lifecycles,
+2. Despite MVP/C libraries reduce the pain of Android lifecycles,
 there are still some lifecycles and there is still some pain.
 Phlux allows to forget about Android lifecycles even more.
 
@@ -41,8 +35,13 @@ Phlux allows to use the current workflow and it does not require to hardcode all
 
 ##### More pros
 
-So I decided to implement a simplified version of Flux that
-is more Android-friendly and allows to call `view.update(viewState)`
+Android has troubles with background task continuation, so the architecture
+must be ready for stress conditions
+(wiping out background tasks and static variables is one of such conditions).
+Phlux handles background tasks and it does it even better than any MVP/C implementation.
+Forget about memory leaks, lost data and simultaneously running requests.
+
+Phlux is more Android-friendly and allows to call `view.update(viewState)`
 at the end of all.
 
 `update` Looks like a ViewHolder's method, isn't it?
