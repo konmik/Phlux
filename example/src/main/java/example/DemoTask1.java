@@ -20,28 +20,22 @@ public abstract class DemoTask1 implements PhluxBackground<DemoState> {
             @Override
             protected Void doInBackground(Void... params) {
                 for (float progress = 0; progress <= 100 && !isCancelled(); progress++) {
-                    publishProgress(progress);
+                    final float finalProgress = progress;
+                    callback.apply(state -> DemoState.create(finalProgress));
                     sleep();
                 }
                 return null;
             }
-
-            @Override
-            protected void onProgressUpdate(Float... values) {
-                super.onProgressUpdate(values);
-                if (values.length > 0)
-                    callback.apply(state -> DemoState.create(values[values.length - 1]));
-            }
-
-            private void sleep() {
-                try {
-                    Thread.sleep(100);
-                }
-                catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
         }.execute();
         return () -> task.cancel(true);
+    }
+
+    private static void sleep() {
+        try {
+            Thread.sleep(100);
+        }
+        catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

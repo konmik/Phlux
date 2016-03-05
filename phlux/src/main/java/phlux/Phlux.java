@@ -1,11 +1,14 @@
 package phlux;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static phlux.Util.with;
 import static phlux.Util.without;
@@ -18,71 +21,174 @@ public enum Phlux {
 
     INSTANCE;
 
-    private Map<String, Scope> root = Collections.emptyMap();
+    private static final int STM_MAX_TRY = 99;
 
-    public void create(String key, PhluxState initialState) {
-        put(key, new Scope(initialState));
+    private AtomicReference<Map<String, Scope>> root = new AtomicReference<>(Collections.<String, Scope>emptyMap());
+    private Handler mainHandler = new Handler(Looper.getMainLooper());
+
+    public void create(final String key, final PhluxState initialState) {
+        ScopeTransactionResult result = swapScope(key, new ScopeTransaction() {
+            @Override
+            public Scope transact(Scope scope) {
+                return new Scope(initialState);
+            }
+        });
+        for (Map.Entry<Integer, PhluxBackground> entry : result.now.background.entrySet())
+            execute(key, entry.getKey(), entry.getValue());
     }
 
-    public void restore(String key, Parcelable scope) {
-        if (!root.containsKey(key))
-            put(key, (Scope) scope);
+    public void restore(final String key, final Parcelable scope) {
+        ScopeTransactionResult result = swapScope(key, new ScopeTransaction() {
+            @Override
+            public Scope transact(Scope scope1) {
+                return scope1 == null ? (Scope) scope : scope1;
+            }
+        });
+        if (result.prev == null) {
+            for (Map.Entry<Integer, PhluxBackground> entry : result.now.background.entrySet())
+                execute(key, entry.getKey(), entry.getValue());
+        }
     }
 
     public Parcelable get(String key) {
-        return root.get(key);
-    }
-
-    public void remove(String key) {
-        if (root.containsKey(key)) {
-            Scope scope = root.get(key);
-            for (PhluxBackgroundCancellable cancellable : scope.cancellable.values())
-                cancellable.cancel();
-
-            root = without(root, key);
-        }
+        return root.get().get(key);
     }
 
     public PhluxState state(String key) {
-        return root.get(key).state;
+        Scope scope = root.get().get(key);
+        return scope == null ? null : scope.state;
     }
 
-    public <S extends PhluxState> void apply(String key, PhluxFunction<S> function) {
-        if (root.containsKey(key)) {
-            Scope scope = root.get(key);
-            S newValue = function.call((S) scope.state);
-            root = with(root, key, new Scope(newValue, scope.callbacks, scope.background, scope.cancellable));
+    public void remove(final String key) {
+        ScopeTransactionResult result = swapScope(key, new ScopeTransaction() {
+            @Override
+            public Scope transact(Scope scope) {
+                return null;
+            }
+        });
+        if (result.prev != null) {
+            for (PhluxBackgroundCancellable cancellable : result.prev.cancellable.values())
+                cancellable.cancel();
+        }
+    }
 
+    public <S extends PhluxState> PhluxApplyResult<S> apply(final String key, final PhluxFunction<S> function) {
+        ScopeTransactionResult result = swapScope(key, new ScopeTransaction() {
+            @Override
+            public Scope transact(Scope scope) {
+                return scope == null ? null : scope.withState(function.call((S) scope.state));
+            }
+        });
+        if (result.now != null)
+            callback(key, result.now);
+        return new PhluxApplyResult(result.prev == null ? null : result.prev.state, result.now == null ? null : result.now.state);
+    }
+
+    public void background(String key, final int id, final PhluxBackground task) {
+        ScopeTransactionResult result = swapScope(key, new ScopeTransaction() {
+            @Override
+            public Scope transact(Scope scope) {
+                return scope == null ? null : scope
+                    .withBackground(with(scope.background, id, task))
+                    .withCancellable(without(scope.cancellable, id));
+            }
+        });
+        if (result.prev != null && result.prev.cancellable.containsKey(id))
+            result.prev.cancellable.get(id).cancel();
+
+        final PhluxBackgroundCancellable cancellable = execute(key, id, task);
+
+        ScopeTransactionResult result2 = swapScope(key, new ScopeTransaction() {
+            @Override
+            public Scope transact(Scope scope) {
+                return scope == null ? null :
+                    scope.background.get(id) == task ? scope.withCancellable(with(scope.cancellable, id, cancellable)) : scope;
+            }
+        });
+        if (result2.now == result2.prev)
+            cancellable.cancel();
+    }
+
+    public void drop(String key, final int id) {
+        ScopeTransactionResult result = swapScope(key, new ScopeTransaction() {
+            @Override
+            public Scope transact(Scope scope) {
+                return scope == null ? null : scope
+                    .withBackground(without(scope.background, id))
+                    .withCancellable(without(scope.cancellable, id));
+            }
+        });
+        if (result.prev != null && result.prev.cancellable.containsKey(id))
+            result.prev.cancellable.get(id).cancel();
+    }
+
+    public void register(String key, final PhluxStateCallback callback) {
+        swapScope(key, new ScopeTransaction() {
+            @Override
+            public Scope transact(Scope scope) {
+                return scope == null ? null : scope.withCallbacks(with(scope.callbacks, callback));
+            }
+        });
+    }
+
+    public void unregister(String key, final PhluxStateCallback callback) {
+        swapScope(key, new ScopeTransaction() {
+            @Override
+            public Scope transact(Scope scope) {
+                return scope == null ? null : scope.withCallbacks(without(scope.callbacks, callback));
+            }
+        });
+    }
+
+    private void callback(final String key, final Scope scope) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
             for (PhluxStateCallback callback : scope.callbacks)
-                callback.call(newValue);
+                callback.call(scope.state);
+        }
+        else {
+            mainHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Scope current = root.get().get(key);
+                    if (current != null && current.state == scope.state) {
+                        for (PhluxStateCallback callback : current.callbacks)
+                            callback.call(scope.state);
+                    }
+                }
+            });
         }
     }
 
-    public void background(String key, int id, PhluxBackground task) {
-        drop(key, id);
-        Scope scope = root.get(key);
-        root = with(root, key, new Scope(scope.state, scope.callbacks, with(scope.background, id, task), with(scope.cancellable, id, execute(key, id, task))));
-    }
-
-    public void drop(String key, int id) {
-        Scope scope = root.get(key);
-        if (scope.cancellable.containsKey(id))
-            scope.cancellable.get(id).cancel();
-        root = with(root, key, new Scope(scope.state, scope.callbacks, without(scope.background, id), without(scope.cancellable, id)));
-    }
-
-    public void register(String key, PhluxStateCallback callback) {
-        if (root.containsKey(key)) {
-            Scope scope = root.get(key);
-            root = with(root, key, new Scope(scope.state, with(scope.callbacks, callback), scope.background, scope.cancellable));
+    private static class ScopeTransactionResult extends PhluxApplyResult<Scope> {
+        private ScopeTransactionResult(String key, PhluxApplyResult<Map<String, Scope>> result) {
+            super(result.prev.get(key), result.now.get(key));
         }
     }
 
-    public void unregister(String key, PhluxStateCallback callback) {
-        if (root.containsKey(key)) {
-            Scope scope = root.get(key);
-            root = with(root, key, new Scope(scope.state, without(scope.callbacks, callback), scope.background, scope.cancellable));
+    private ScopeTransactionResult swapScope(final String key, final ScopeTransaction transaction) {
+        return new ScopeTransactionResult(key, swap(new Transaction() {
+            @Override
+            public Map<String, Scope> transact(Map<String, Scope> root) {
+                Scope scope = transaction.transact(root.get(key));
+                return scope == null ? without(root, key) : with(root, key, scope);
+            }
+        }));
+    }
+
+    private PhluxApplyResult<Map<String, Scope>> swap(Transaction transaction) {
+        int counter = 0;
+        PhluxApplyResult<Map<String, Scope>> newValue;
+        while ((newValue = tryTransaction(root, transaction)) == null) {
+            if (++counter > STM_MAX_TRY)
+                throw new IllegalStateException("Are you doing time consuming operations during Phlux apply()?");
         }
+        return newValue;
+    }
+
+    private PhluxApplyResult<Map<String, Scope>> tryTransaction(AtomicReference<Map<String, Scope>> ref, Transaction transaction) {
+        Map<String, Scope> original = ref.get();
+        Map<String, Scope> newValue = transaction.transact(original);
+        return ref.compareAndSet(original, newValue) ? new PhluxApplyResult<>(original, newValue) : null;
     }
 
     @Override
@@ -92,29 +198,33 @@ public enum Phlux {
             '}';
     }
 
-    private void put(String key, Scope scope) {
-        root = with(root, key, scope);
-        for (Map.Entry<Integer, PhluxBackground> entry : scope.background.entrySet())
-            execute(key, entry.getKey(), entry.getValue());
-    }
-
     private <S extends PhluxState> PhluxBackgroundCancellable execute(final String key, final int id, final PhluxBackground<S> entry) {
         return entry.execute(new PhluxBackgroundCallback<S>() {
             @Override
             public void apply(PhluxFunction<S> function) {
-                if (root.containsKey(key)) {
-                    Phlux.this.apply(key, function);
-                }
+                Phlux.this.apply(key, function);
             }
 
             @Override
             public void dismiss() {
-                if (root.containsKey(key)) {
-                    Scope scope = root.get(key);
-                    root = with(root, key, new Scope(scope.state, scope.callbacks, without(scope.background, id), without(scope.cancellable, id)));
-                }
+                swapScope(key, new ScopeTransaction() {
+                    @Override
+                    public Scope transact(Scope scope) {
+                        return scope == null ? null : scope
+                            .withBackground(without(scope.background, id))
+                            .withCancellable(without(scope.cancellable, id));
+                    }
+                });
             }
         });
+    }
+
+    private interface Transaction {
+        Map<String, Scope> transact(Map<String, Scope> root);
+    }
+
+    private interface ScopeTransaction {
+        Scope transact(Scope scope);
     }
 
     static class Scope implements Parcelable {
@@ -136,6 +246,22 @@ public enum Phlux {
             this.callbacks = Collections.emptyList();
             this.background = Collections.emptyMap();
             this.cancellable = Collections.emptyMap();
+        }
+
+        public Scope withState(PhluxState state) {
+            return new Scope(state, callbacks, background, cancellable);
+        }
+
+        public Scope withCallbacks(List<PhluxStateCallback> callbacks) {
+            return new Scope(state, callbacks, background, cancellable);
+        }
+
+        public Scope withBackground(Map<Integer, PhluxBackground> background) {
+            return new Scope(state, callbacks, background, cancellable);
+        }
+
+        public Scope withCancellable(Map<Integer, PhluxBackgroundCancellable> cancellable) {
+            return new Scope(state, callbacks, background, cancellable);
         }
 
         protected Scope(Parcel in) {

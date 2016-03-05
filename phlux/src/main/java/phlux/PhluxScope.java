@@ -51,8 +51,8 @@ public class PhluxScope<S extends PhluxState> {
     /**
      * Applies a function to the scope's state.
      */
-    public void apply(PhluxFunction<S> function) {
-        phlux.apply(key, function);
+    public PhluxApplyResult<S> apply(PhluxFunction<S> function) {
+        return phlux.apply(key, function);
     }
 
     /**

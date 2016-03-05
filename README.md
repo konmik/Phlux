@@ -62,6 +62,11 @@ the called function is *Phlux Root*.
 The main idea about this schema is that it is data-centric. And the data is immutable and parcelable,
 so you can always rely on it.
 
+`apply()` must not have side effects. It can be called multiple times.
+Phlux uses "software transactional memory"
+(`root.compareAndSet(originalRoot, newRoot)`)
+to apply root variable to provide maximum performance and reliability.
+
 "It is better to have 100 functions operate on one data structure than 10 functions on 10 data structures." — Alan Perlis
 
 So now we have this one data structure and our function number does not increase so dramatically, we have even lesser
@@ -205,6 +210,6 @@ This is still a pain, so I think about implementing Interactor pattern on top of
 
 - Docs? :D
 
-- STM multithreading support for state changes. Race condition analysis.
+- Race condition analysis.
 
 - Leverage the new AutoValue plugin [with-](https://github.com/google/auto/issues/294) methods in the example when 2.0.0 will be released.

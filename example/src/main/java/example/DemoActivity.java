@@ -31,7 +31,7 @@ public class DemoActivity extends PhluxActivity<DemoState> {
             setWeight(R.id.padding_after, 100 - progress);
 
             TextView text = (TextView) findViewById(R.id.progressText);
-            text.setText(String.format("%.0f", progress));
+            text.setText(String.format("PROGRESS: %.0f%%", progress));
         });
     }
 
