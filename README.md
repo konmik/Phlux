@@ -235,6 +235,4 @@ The library can potentially fit very well into MVVM but I do not care about data
 
 - Docs? :D
 
-- Race condition analysis.
-
 - Leverage the new AutoValue plugin [with-](https://github.com/google/auto/issues/294) methods in the example when 1.2 will be released.
