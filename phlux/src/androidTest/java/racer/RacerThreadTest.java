@@ -3,11 +3,12 @@ package racer;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Collections;
+import java.util.List;
 
 import static racer.RacerThread.race;
 import static racer.Util.now;
+import static racer.Util.run;
 
 public class RacerThreadTest {
 
@@ -27,35 +28,29 @@ public class RacerThreadTest {
      */
     @Test(expected = RacingConditionException.class)
     public void testRace() throws Exception {
-        final AtomicInteger retry = new AtomicInteger();
         final long time1 = now();
-        run(TEST_RETRIES, TIME_LIMIT, new Runnable() {
+        run(TEST_RETRIES, TIME_LIMIT, new Util.Iteration() {
             @Override
-            public void run() {
-                int retryCount = retry.incrementAndGet();
+            public void run(int iteration) {
                 final MyList<Integer> list = new MyList<>();
 
-                race(THREADS_NUMBER, new RacerThread.Factory() {
-                    @Override
-                    public RacerThread create(final int threadIndex) {
-                        return new RacerThread(Arrays.<Runnable>asList(new Runnable() {
-                            @Override
-                            public void run() {
-                                list.putIfAbsent(threadIndex % 5);
-                            }
-                        }));
-                    }
-                });
+                List<List<Runnable>> threads = new ArrayList<>();
+
+                for (int i = 0; i < THREADS_NUMBER; i++) {
+                    final int finalI = i;
+                    threads.add(Collections.<Runnable>singletonList(new Runnable() {
+                        @Override
+                        public void run() {
+                            list.putIfAbsent(finalI % 5);
+                        }
+                    }));
+                }
+
+                race(threads);
 
                 if (list.size() != 5)
-                    throw new RacingConditionException("retry: " + retryCount + " during: " + (now() - time1) + "ms");
+                    throw new RacingConditionException("iteration: " + iteration + " during: " + (now() - time1) + "ms");
             }
         });
-    }
-
-    public static void run(int retry, int timeLimit, Runnable runnable) {
-        final long time1 = now();
-        for (int i = 0; i < retry && now() - time1 < timeLimit; i++)
-            runnable.run();
     }
 }

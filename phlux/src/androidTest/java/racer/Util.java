@@ -25,4 +25,14 @@ public class Util {
     public static long now() {
         return System.nanoTime() / 1000000;
     }
+
+    public static void run(int retry, int timeLimit, Iteration iteration) {
+        final long time1 = now();
+        for (int i = 0; i < retry && now() - time1 < timeLimit; i++)
+            iteration.run(i);
+    }
+
+    public interface Iteration {
+        void run(int iteration);
+    }
 }

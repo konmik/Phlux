@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static java.lang.Math.max;
 import static java.util.Collections.shuffle;
 import static racer.Util.acquire;
 import static racer.Util.sleep;
@@ -43,24 +44,23 @@ public class RacerThread {
         return true;
     }
 
-    public static void race(int threadNumber, Factory factory) {
+    public static void race(List<List<Runnable>> threads) {
 
-        List<RacerThread> threads = new ArrayList<>();
+        List<RacerThread> racerThreads = new ArrayList<>();
 
-        for (int i = 0; i < threadNumber; i++) {
-            threads.add(factory.create(i));
+        int maxSteps = 0;
+        for (List<Runnable> thread : threads) {
+            maxSteps = max(maxSteps, thread.size());
+            racerThreads.add(new RacerThread(thread));
         }
 
-        shuffle(threads);
+        for (int i = 0; i < maxSteps; i++) {
+            shuffle(racerThreads);
+            for (RacerThread thread : racerThreads)
+                thread.next();
+        }
 
-        for (RacerThread thread : threads)
-            thread.next();
-
-        while (!completed(threads))
+        while (!completed(racerThreads))
             sleep(1);
-    }
-
-    public interface Factory {
-        RacerThread create(int threadIndex);
     }
 }
