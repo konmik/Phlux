@@ -1,9 +1,13 @@
 package racer;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static java.util.Collections.shuffle;
 import static racer.Util.acquire;
+import static racer.Util.sleep;
 
 public class RacerThread {
 
@@ -37,5 +41,26 @@ public class RacerThread {
                 return false;
         }
         return true;
+    }
+
+    public static void race(int threadNumber, Factory factory) {
+
+        List<RacerThread> threads = new ArrayList<>();
+
+        for (int i = 0; i < threadNumber; i++) {
+            threads.add(factory.create(i));
+        }
+
+        shuffle(threads);
+
+        for (RacerThread thread : threads)
+            thread.next();
+
+        while (!completed(threads))
+            sleep(1);
+    }
+
+    public interface Factory {
+        RacerThread create(int threadIndex);
     }
 }

@@ -4,13 +4,10 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static java.util.Collections.shuffle;
-import static racer.RacerThread.completed;
+import static racer.RacerThread.race;
 import static racer.Util.now;
-import static racer.Util.sleep;
 
 public class RacerThreadTest {
 
@@ -38,34 +35,22 @@ public class RacerThreadTest {
                 int retryCount = retry.incrementAndGet();
                 final MyList<Integer> list = new MyList<>();
 
-                List<RacerThread> threads = new ArrayList<>();
-                for (int i = 0; i < THREADS_NUMBER; i++) {
-                    final int finalI = i;
-                    threads.add(new RacerThread(Arrays.<Runnable>asList(new Runnable() {
-                        @Override
-                        public void run() {
-                            list.putIfAbsent(finalI % 5);
-                        }
-                    })));
-                }
-                shuffle(threads);
-
-                for (RacerThread thread : threads)
-                    thread.next();
-
-                while (!completed(threads))
-                    sleep(1);
+                race(THREADS_NUMBER, new RacerThread.Factory() {
+                    @Override
+                    public RacerThread create(final int threadIndex) {
+                        return new RacerThread(Arrays.<Runnable>asList(new Runnable() {
+                            @Override
+                            public void run() {
+                                list.putIfAbsent(threadIndex % 5);
+                            }
+                        }));
+                    }
+                });
 
                 if (list.size() != 5)
                     throw new RacingConditionException("retry: " + retryCount + " during: " + (now() - time1) + "ms");
             }
         });
-    }
-
-    private static class RacingConditionException extends RuntimeException {
-        public RacingConditionException(String message) {
-            super(message);
-        }
     }
 
     public static void run(int retry, int timeLimit, Runnable runnable) {
