@@ -21,4 +21,8 @@ public class Util {
             throw new RuntimeException(e);
         }
     }
+
+    public static long now() {
+        return System.nanoTime() / 1000000;
+    }
 }
