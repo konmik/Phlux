@@ -22,6 +22,16 @@ public class Util {
         }
     }
 
+    public static boolean waitFor(int milliseconds, Condition condition) {
+        long target = System.nanoTime() / 1000000 + milliseconds;
+        while (System.nanoTime() / 1000000 < target) {
+            if (condition.isTrue())
+                return true;
+            sleep(1);
+        }
+        return false;
+    }
+
     public static long now() {
         return System.nanoTime() / 1000000;
     }
@@ -34,5 +44,9 @@ public class Util {
 
     public interface Iteration {
         void run(int iteration);
+    }
+
+    public interface Condition {
+        boolean isTrue();
     }
 }
