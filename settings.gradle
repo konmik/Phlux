@@ -1,1 +1,1 @@
-include ':phlux', ':base-views', ':example'
+include ':phlux', ':base-views', ':example', ':phlux-tests'

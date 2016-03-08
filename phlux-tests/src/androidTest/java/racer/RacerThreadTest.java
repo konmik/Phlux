@@ -29,28 +29,20 @@ public class RacerThreadTest {
     @Test(expected = RacingConditionException.class)
     public void testRace() throws Exception {
         final long time1 = now();
-        run(TEST_RETRIES, TIME_LIMIT, new Util.Iteration() {
-            @Override
-            public void run(int iteration) {
-                final MyList<Integer> list = new MyList<>();
+        run(TEST_RETRIES, TIME_LIMIT, iteration -> {
+            MyList<Integer> list = new MyList<>();
 
-                List<List<Runnable>> threads = new ArrayList<>();
+            List<List<Runnable>> threads = new ArrayList<>();
 
-                for (int i = 0; i < THREADS_NUMBER; i++) {
-                    final int finalI = i;
-                    threads.add(Collections.<Runnable>singletonList(new Runnable() {
-                        @Override
-                        public void run() {
-                            list.putIfAbsent(finalI % 5);
-                        }
-                    }));
-                }
-
-                race(threads);
-
-                if (list.size() != 5)
-                    throw new RacingConditionException("iteration: " + iteration + " during: " + (now() - time1) + "ms");
+            for (int i = 0; i < THREADS_NUMBER; i++) {
+                final int finalI = i;
+                threads.add(Collections.<Runnable>singletonList(() -> list.putIfAbsent(finalI % 5)));
             }
+
+            race(threads);
+
+            if (list.size() != 5)
+                throw new RacingConditionException("iteration: " + iteration + " during: " + (now() - time1) + "ms");
         });
     }
 }

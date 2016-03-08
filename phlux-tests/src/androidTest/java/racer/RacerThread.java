@@ -16,15 +16,12 @@ public class RacerThread {
     private final AtomicBoolean completed = new AtomicBoolean();
 
     public RacerThread(final Iterable<Runnable> list) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for (Runnable runnable : list) {
-                    acquire(semaphore);
-                    runnable.run();
-                }
-                completed.set(true);
+        new Thread(() -> {
+            for (Runnable runnable : list) {
+                acquire(semaphore);
+                runnable.run();
             }
+            completed.set(true);
         }).start();
     }
 
