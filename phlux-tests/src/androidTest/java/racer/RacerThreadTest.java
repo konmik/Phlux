@@ -17,7 +17,7 @@ public class RacerThreadTest {
     public static final int THREADS_NUMBER = 10;
 
     public class MyList<T> extends ArrayList<T> {
-        public void putIfAbsent(T o) {
+        public synchronized void putIfAbsent(T o) {
             if (!contains(o))
                 add(o);
         }
@@ -26,9 +26,9 @@ public class RacerThreadTest {
     /**
      * Test fails if {@link RacerThreadTest.MyList#putIfAbsent(Object)} does not have synchronized in its declaration.
      */
-    @Test(expected = RacingConditionException.class)
+    @Test
     public void testRace() throws Exception {
-        final long time1 = now();
+        long time1 = now();
         run(TEST_RETRIES, TIME_LIMIT, iteration -> {
             MyList<Integer> list = new MyList<>();
 

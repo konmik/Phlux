@@ -62,8 +62,8 @@ public class PhluxTest {
     @Test
     public void testRace() throws Exception {
 
-        final AtomicLong calls = new AtomicLong();
-        final AtomicLong funcs = new AtomicLong();
+        AtomicLong calls = new AtomicLong();
+        AtomicLong funcs = new AtomicLong();
 
         run(TEST_RETRIES, TIME_LIMIT, iteration -> {
 
