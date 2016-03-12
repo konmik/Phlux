@@ -29,6 +29,7 @@ public class PhluxViewAdapter<S extends PhluxState> {
     public void onRestore(Bundle bundle) {
         if (scope != null)
             throw new IllegalStateException("onRestore() must be called before scope() and before onResume()");
+
         scope = new PhluxScope<>(bundle);
         scope.register(callback);
     }
@@ -61,9 +62,6 @@ public class PhluxViewAdapter<S extends PhluxState> {
     }
 
     public void onDestroy() {
-        if (scope != null) {
-            scope.unregister(callback);
-            scope = null;
-        }
+        scope.unregister(callback);
     }
 }
