@@ -208,7 +208,7 @@ This prevents flooding of the main thread with callbacks that can't be processed
 
 ### Why no RxJava
 
-My previous architecture solutions was based on RxJava, however Phlux does not have such dependency.
+My previous architecture solutions were based on RxJava, however Phlux does not have such dependency.
 There are two reasons for this:
 
 - It is hard for newcomers to dive into RxJava *and* a new architecture the same time.
