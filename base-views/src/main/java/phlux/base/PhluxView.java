@@ -8,8 +8,6 @@ import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
 
-import phlux.PhluxBackground;
-import phlux.PhluxFunction;
 import phlux.PhluxScope;
 import phlux.PhluxState;
 import phlux.PhluxViewAdapter;
@@ -23,6 +21,7 @@ public abstract class PhluxView<S extends PhluxState> extends FrameLayout implem
     private static final String SUPER = "super";
 
     private final PhluxViewAdapter<S> adapter = new PhluxViewAdapter<>(this);
+    private boolean retainScope;
 
     public PhluxView(Context context) {
         super(context);
@@ -34,6 +33,10 @@ public abstract class PhluxView<S extends PhluxState> extends FrameLayout implem
 
     public PhluxView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+    }
+
+    public void setRetainScope(boolean retain) {
+        this.retainScope = retain;
     }
 
     @Override
@@ -50,9 +53,9 @@ public abstract class PhluxView<S extends PhluxState> extends FrameLayout implem
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
 
-        if (getActivity().isFinishing()) {
+        if (!retainScope)
             adapter.scope().remove();
-        }
+
         adapter.onDestroy();
     }
 
