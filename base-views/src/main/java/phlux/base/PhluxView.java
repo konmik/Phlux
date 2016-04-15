@@ -21,7 +21,6 @@ public abstract class PhluxView<S extends PhluxState> extends FrameLayout implem
     private static final String SUPER = "super";
 
     private final PhluxViewAdapter<S> adapter = new PhluxViewAdapter<>(this);
-    private boolean retainScope;
 
     public PhluxView(Context context) {
         super(context);
@@ -33,10 +32,6 @@ public abstract class PhluxView<S extends PhluxState> extends FrameLayout implem
 
     public PhluxView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-    }
-
-    public void setRetainScope(boolean retain) {
-        this.retainScope = retain;
     }
 
     @Override
@@ -53,10 +48,8 @@ public abstract class PhluxView<S extends PhluxState> extends FrameLayout implem
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
 
-        if (!retainScope)
-            adapter.scope().remove();
-
-        adapter.onDestroy();
+        if (!getActivity().isChangingConfigurations())
+            adapter.onDestroy();
     }
 
     @Override

@@ -70,7 +70,7 @@ public abstract class PhluxActivity<S extends PhluxState> extends AppCompatActiv
     protected void onDestroy() {
         super.onDestroy();
         adapter.onDestroy();
-        if (isFinishing())
+        if (!isChangingConfigurations())
             adapter.scope().remove();
     }
 }

@@ -77,12 +77,7 @@ public abstract class PhluxFragment<S extends PhluxState> extends Fragment imple
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (getActivity().isFinishing() || isRemoving(this))
+        if (!getActivity().isChangingConfigurations())
             adapter.scope().remove();
-    }
-
-    private static boolean isRemoving(Fragment fragment) {
-        Fragment parent = fragment.getParentFragment();
-        return fragment.isRemoving() || (parent != null && isRemoving(parent));
     }
 }
