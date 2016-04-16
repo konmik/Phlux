@@ -19,7 +19,7 @@ Based on modern best practices:
 Phlux encourages developers to apply a very wide range of best practices and makes them
 easily applicable.
 
-This is Android-aware architecture, it addresses Android lifecycles by design,
+This is an Android-aware architecture, it addresses Android lifecycles by design,
 so you don't even have to think about them while developing applications.
 
 Just a breath of fresh air from the parallel world of functional programming.
