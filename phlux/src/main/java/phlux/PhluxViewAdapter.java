@@ -20,7 +20,6 @@ public class PhluxViewAdapter<S extends PhluxState> {
     private PhluxScope<S> scope;
 
     private HashMap<String, Object> updated = new HashMap<>();
-    private boolean firstOnResume = true;
 
     public PhluxViewAdapter(PhluxView<S> view) {
         this.view = view;
@@ -55,10 +54,7 @@ public class PhluxViewAdapter<S extends PhluxState> {
     }
 
     public void onResume() {
-        if (firstOnResume) {
-            view.update(scope().state());
-            firstOnResume = false;
-        }
+        view.update(scope().state());
     }
 
     public void onDestroy() {
