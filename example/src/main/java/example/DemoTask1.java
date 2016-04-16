@@ -24,6 +24,7 @@ public abstract class DemoTask1 implements PhluxBackground<DemoState> {
                     callback.apply(state -> DemoState.create(finalProgress));
                     sleep();
                 }
+                callback.dismiss();
                 return null;
             }
         }.execute();
