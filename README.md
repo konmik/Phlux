@@ -7,6 +7,23 @@ It is inspired by Clojure and Facebook Flux.
 
 ### Why Phlux?
 
+##### Phlux
+
+Based on modern best practices:
+
+- Simplicity as a cult.
+- Uni-directional application architecture (every function call is under control).
+- Immutable data (every variable is under control).
+- Compare-And-Swap data modifications (forget about deadlocks and race conditions).
+
+Phlux encourages developers to apply a very wide range of best practices and makes them
+easily applicable.
+
+This is Android-aware architecture, it addresses Android lifecycles by design,
+so you don't even have to think about them while developing applications.
+
+Just a breath of fresh air from the parallel world of functional programming.
+
 ##### Why not MVP
 
 1. Immutable data is a key ingredient in building reliable software.
@@ -22,12 +39,11 @@ Phlux allows to forget about Android lifecycles even more.
 must be ready for stress conditions
 (wiping out background tasks and static variables is one of such conditions).
 Phlux handles background tasks much better than any MVP/C implementation.
-Forget about memory leaks, lost data and simultaneously running requests.
+Forget about memory leaks and lost data.
 
 ##### Why not Flux
 
 1. The original Flux architecture has dispatcher we don't need on Android.
-And even if we will implement it - it will work really bad because of lifecycles.
 If you *really* need a dispatcher it can be easily implemented on top of Phlux.
 
 2. Unlike Flux, we don't have React library for our views.
@@ -117,7 +133,7 @@ unpredictable propagation of changes across application.
 
 But do we really need tons of variables in each application? And, what is a minimum amount
 of variables we can afford? How can we architect our apps to get most of the
-"minimum variables amout" principle?
+"minimum variables amount" principle?
 
 A Phlux-driven application can afford to have just one variable.
 
@@ -235,4 +251,6 @@ The library can potentially fit very well into MVVM but I do not care about data
 
 - Docs? :D
 
-- Leverage the new AutoValue plugin [with-](https://github.com/google/auto/issues/294) methods in the example when 1.2 will be released.
+- Leverage the new AutoValue plugin
+[with-](https://github.com/google/auto/issues/294) methods in the example when
+[Complete Builder support](https://github.com/rharter/auto-value-parcel/issues/49) issue will be fixed.
