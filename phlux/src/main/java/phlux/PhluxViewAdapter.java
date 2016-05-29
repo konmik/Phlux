@@ -8,16 +8,16 @@ import java.util.HashMap;
  * PhluxViewAdapter incorporates common view logic.
  * This should be a single place where view state is stored.
  */
-public class PhluxViewAdapter<S extends PhluxState> {
+public class PhluxViewAdapter<S extends ViewState> {
 
     private final PhluxView<S> view;
-    private final PhluxStateCallback<S> callback = new PhluxStateCallback<S>() {
+    private final StateCallback<S> callback = new StateCallback<S>() {
         @Override
         public void call(S state) {
             view.update(state);
         }
     };
-    private PhluxScope<S> scope;
+    private Scope<S> scope;
 
     private HashMap<String, Object> updated = new HashMap<>();
 
@@ -29,13 +29,13 @@ public class PhluxViewAdapter<S extends PhluxState> {
         if (scope != null)
             throw new IllegalStateException("onRestore() must be called before scope() and before onResume()");
 
-        scope = new PhluxScope<>(bundle);
+        scope = new Scope<>(bundle);
         scope.register(callback);
     }
 
-    public PhluxScope<S> scope() {
+    public Scope<S> scope() {
         if (scope == null) {
-            scope = new PhluxScope<>(view.initial());
+            scope = new Scope<>(view.initial());
             scope.register(callback);
             view.onScopeCreated(scope);
         }

@@ -4,11 +4,11 @@ import android.support.annotation.Nullable;
 
 import auto.parcel.AutoParcel;
 import base.ServerAPI;
-import phlux.PhluxState;
+import phlux.ViewState;
 import phlux.Transient;
 
 @AutoParcel
-public abstract class MainState implements PhluxState {
+public abstract class MainState implements ViewState {
 
     static final String NAME_1 = "Chuck Norris";
     static final String NAME_2 = "Jackie Chan";

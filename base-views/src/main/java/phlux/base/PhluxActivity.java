@@ -3,15 +3,15 @@ package phlux.base;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-import phlux.PhluxScope;
-import phlux.PhluxState;
+import phlux.Scope;
+import phlux.ViewState;
 import phlux.PhluxView;
 import phlux.PhluxViewAdapter;
 
 /**
  * This is an *example* of how to adapt Phlux to Activities.
  */
-public abstract class PhluxActivity<S extends PhluxState> extends AppCompatActivity implements PhluxView<S> {
+public abstract class PhluxActivity<S extends ViewState> extends AppCompatActivity implements PhluxView<S> {
 
     private static final String PHLUX_SCOPE = "phlux_scope";
 
@@ -31,7 +31,7 @@ public abstract class PhluxActivity<S extends PhluxState> extends AppCompatActiv
     }
 
     @Override
-    public PhluxScope<S> scope() {
+    public Scope<S> scope() {
         return adapter.scope();
     }
 
@@ -51,7 +51,7 @@ public abstract class PhluxActivity<S extends PhluxState> extends AppCompatActiv
     }
 
     @Override
-    public void onScopeCreated(PhluxScope<S> scope) {
+    public void onScopeCreated(Scope<S> scope) {
     }
 
     @Override

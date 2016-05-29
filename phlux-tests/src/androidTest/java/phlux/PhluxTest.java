@@ -33,7 +33,7 @@ public class PhluxTest {
     public void testLifecycle() throws Exception {
 
         AtomicReference<TestState> calledBack = new AtomicReference<>();
-        PhluxStateCallback callback = state -> {
+        StateCallback callback = state -> {
             assertEquals(Looper.myLooper(), Looper.getMainLooper());
             assertTrue(calledBack.compareAndSet(null, (TestState) state));
         };

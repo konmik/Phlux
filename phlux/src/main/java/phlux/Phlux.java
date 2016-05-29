@@ -16,7 +16,7 @@ import static phlux.Util.without;
 
 /**
  * This singleton should be a single place where mutable state of the entire application is stored.
- * Don't use the class directly - {@link PhluxScope} is a more convenient and type-safe way.
+ * Don't use the class directly - {@link phlux.Scope} is a more convenient and type-safe way.
  */
 public enum Phlux {
 
@@ -27,14 +27,14 @@ public enum Phlux {
     private AtomicReference<Map<String, Scope>> root = new AtomicReference<>(Collections.<String, Scope>emptyMap());
     private Handler mainHandler = new Handler(Looper.getMainLooper());
 
-    public void create(final String key, final PhluxState initialState) {
+    public void create(final String key, final ViewState initialState) {
         ScopeTransactionResult result = swapScope(key, new ScopeTransaction() {
             @Override
             public Scope transact(Scope scope) {
                 return new Scope(initialState);
             }
         });
-        for (Map.Entry<Integer, PhluxBackground> entry : result.now.background.entrySet())
+        for (Map.Entry<Integer, Background> entry : result.now.background.entrySet())
             execute(key, entry.getKey(), entry.getValue());
     }
 
@@ -46,7 +46,7 @@ public enum Phlux {
             }
         });
         if (result.prev == null) {
-            for (Map.Entry<Integer, PhluxBackground> entry : result.now.background.entrySet())
+            for (Map.Entry<Integer, Background> entry : result.now.background.entrySet())
                 execute(key, entry.getKey(), entry.getValue());
         }
     }
@@ -55,7 +55,7 @@ public enum Phlux {
         return root.get().get(key);
     }
 
-    public PhluxState state(String key) {
+    public ViewState state(String key) {
         Scope scope = root.get().get(key);
         return scope == null ? null : scope.state;
     }
@@ -68,13 +68,13 @@ public enum Phlux {
             }
         });
         if (result.prev != null) {
-            for (PhluxBackgroundCancellable cancellable : result.prev.cancellable.values())
+            for (Cancellable cancellable : result.prev.cancellable.values())
                 cancellable.cancel();
         }
     }
 
     @Nullable
-    public <S extends PhluxState> PhluxApplyResult<S> apply(final String key, final PhluxFunction<S> function) {
+    public <S extends ViewState> ApplyResult<S> apply(final String key, final Function<S> function) {
         ScopeTransactionResult result = swapScope(key, new ScopeTransaction() {
             @Override
             public Scope transact(Scope scope) {
@@ -83,10 +83,10 @@ public enum Phlux {
         });
         if (result.now != null)
             callback(key, result.now);
-        return result.prev == null ? null : new PhluxApplyResult(result.prev.state, result.now.state);
+        return result.prev == null ? null : new ApplyResult(result.prev.state, result.now.state);
     }
 
-    public void background(String key, final int id, final PhluxBackground task) {
+    public void background(String key, final int id, final Background task) {
         ScopeTransactionResult result = swapScope(key, new ScopeTransaction() {
             @Override
             public Scope transact(Scope scope) {
@@ -98,7 +98,7 @@ public enum Phlux {
         if (result.prev != null && result.prev.cancellable.containsKey(id))
             result.prev.cancellable.get(id).cancel();
 
-        final PhluxBackgroundCancellable cancellable = execute(key, id, task);
+        final Cancellable cancellable = execute(key, id, task);
 
         ScopeTransactionResult result2 = swapScope(key, new ScopeTransaction() {
             @Override
@@ -124,7 +124,7 @@ public enum Phlux {
             result.prev.cancellable.get(id).cancel();
     }
 
-    public void register(String key, final PhluxStateCallback callback) {
+    public void register(String key, final StateCallback callback) {
         swapScope(key, new ScopeTransaction() {
             @Override
             public Scope transact(Scope scope) {
@@ -133,7 +133,7 @@ public enum Phlux {
         });
     }
 
-    public void unregister(String key, final PhluxStateCallback callback) {
+    public void unregister(String key, final StateCallback callback) {
         swapScope(key, new ScopeTransaction() {
             @Override
             public Scope transact(Scope scope) {
@@ -144,7 +144,7 @@ public enum Phlux {
 
     private void callback(final String key, final Scope scope) {
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            for (PhluxStateCallback callback : scope.callbacks)
+            for (StateCallback callback : scope.callbacks)
                 callback.call(scope.state);
         }
         else {
@@ -153,7 +153,7 @@ public enum Phlux {
                 public void run() {
                     Scope current = root.get().get(key);
                     if (current != null && current.state == scope.state) {
-                        for (PhluxStateCallback callback : current.callbacks)
+                        for (StateCallback callback : current.callbacks)
                             callback.call(scope.state);
                     }
                 }
@@ -161,8 +161,8 @@ public enum Phlux {
         }
     }
 
-    private static class ScopeTransactionResult extends PhluxApplyResult<Scope> {
-        private ScopeTransactionResult(String key, PhluxApplyResult<Map<String, Scope>> result) {
+    private static class ScopeTransactionResult extends ApplyResult<Scope> {
+        private ScopeTransactionResult(String key, ApplyResult<Map<String, Scope>> result) {
             super(result.prev.get(key), result.now.get(key));
         }
     }
@@ -177,9 +177,9 @@ public enum Phlux {
         }));
     }
 
-    private PhluxApplyResult<Map<String, Scope>> swap(Transaction transaction) {
+    private ApplyResult<Map<String, Scope>> swap(Transaction transaction) {
         int counter = 0;
-        PhluxApplyResult<Map<String, Scope>> newValue;
+        ApplyResult<Map<String, Scope>> newValue;
         while ((newValue = tryTransaction(root, transaction)) == null) {
             if (++counter > STM_MAX_TRY)
                 throw new IllegalStateException("Are you doing time consuming operations during Phlux apply()?");
@@ -187,10 +187,10 @@ public enum Phlux {
         return newValue;
     }
 
-    private PhluxApplyResult<Map<String, Scope>> tryTransaction(AtomicReference<Map<String, Scope>> ref, Transaction transaction) {
+    private ApplyResult<Map<String, Scope>> tryTransaction(AtomicReference<Map<String, Scope>> ref, Transaction transaction) {
         Map<String, Scope> original = ref.get();
         Map<String, Scope> newValue = transaction.transact(original);
-        return ref.compareAndSet(original, newValue) ? new PhluxApplyResult<>(original, newValue) : null;
+        return ref.compareAndSet(original, newValue) ? new ApplyResult<>(original, newValue) : null;
     }
 
     @Override
@@ -200,10 +200,10 @@ public enum Phlux {
             '}';
     }
 
-    private <S extends PhluxState> PhluxBackgroundCancellable execute(final String key, final int id, final PhluxBackground<S> entry) {
-        return entry.execute(new PhluxBackgroundCallback<S>() {
+    private <S extends ViewState> Cancellable execute(final String key, final int id, final Background<S> entry) {
+        return entry.execute(new BackgroundCallback<S>() {
             @Override
-            public void apply(PhluxFunction<S> function) {
+            public void apply(Function<S> function) {
                 Phlux.this.apply(key, function);
             }
 
@@ -231,45 +231,45 @@ public enum Phlux {
 
     static class Scope implements Parcelable {
 
-        final PhluxState state;
-        final List<PhluxStateCallback> callbacks;
-        final Map<Integer, PhluxBackground> background;
-        final Map<Integer, PhluxBackgroundCancellable> cancellable;
+        final ViewState state;
+        final List<StateCallback> callbacks;
+        final Map<Integer, Background> background;
+        final Map<Integer, Cancellable> cancellable;
 
-        Scope(PhluxState state, List<PhluxStateCallback> callbacks, Map<Integer, PhluxBackground> background, Map<Integer, PhluxBackgroundCancellable> cancellable) {
+        Scope(ViewState state, List<StateCallback> callbacks, Map<Integer, Background> background, Map<Integer, Cancellable> cancellable) {
             this.state = state;
             this.callbacks = callbacks;
             this.background = background;
             this.cancellable = cancellable;
         }
 
-        Scope(PhluxState state) {
+        Scope(ViewState state) {
             this.state = state;
             this.callbacks = Collections.emptyList();
             this.background = Collections.emptyMap();
             this.cancellable = Collections.emptyMap();
         }
 
-        public Scope withState(PhluxState state) {
+        public Scope withState(ViewState state) {
             return new Scope(state, callbacks, background, cancellable);
         }
 
-        public Scope withCallbacks(List<PhluxStateCallback> callbacks) {
+        public Scope withCallbacks(List<StateCallback> callbacks) {
             return new Scope(state, callbacks, background, cancellable);
         }
 
-        public Scope withBackground(Map<Integer, PhluxBackground> background) {
+        public Scope withBackground(Map<Integer, Background> background) {
             return new Scope(state, callbacks, background, cancellable);
         }
 
-        public Scope withCancellable(Map<Integer, PhluxBackgroundCancellable> cancellable) {
+        public Scope withCancellable(Map<Integer, Cancellable> cancellable) {
             return new Scope(state, callbacks, background, cancellable);
         }
 
         protected Scope(Parcel in) {
-            this.state = in.readParcelable(PhluxState.class.getClassLoader());
+            this.state = in.readParcelable(ViewState.class.getClassLoader());
             this.callbacks = Collections.emptyList();
-            this.background = Collections.unmodifiableMap(in.readHashMap(PhluxState.class.getClassLoader()));
+            this.background = Collections.unmodifiableMap(in.readHashMap(ViewState.class.getClassLoader()));
             this.cancellable = Collections.emptyMap();
         }
 

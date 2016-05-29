@@ -3,7 +3,7 @@ package phlux;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-class TestState implements PhluxState, Parcelable {
+class TestState implements ViewState, Parcelable {
 
     public TestState() {
     }

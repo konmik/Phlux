@@ -6,11 +6,11 @@ import android.os.Parcelable;
  * Represents a background task.
  *
  * The typical use case is to extend this class to keep arguments in it and to implement
- * {@link PhluxBackground#execute(PhluxBackgroundCallback)} to execute the background task itself.
+ * {@link Background#execute(BackgroundCallback)} to execute the background task itself.
  *
- * All subclasses of {@link PhluxBackground} *must* be immutable.
+ * All subclasses of {@link Background} *must* be immutable.
  */
-public interface PhluxBackground<S extends PhluxState> extends Parcelable {
+public interface Background<S extends ViewState> extends Parcelable {
     /**
      * Executes the background task.
      *
@@ -19,5 +19,5 @@ public interface PhluxBackground<S extends PhluxState> extends Parcelable {
      *                 The current implementation implies that the callback must be called
      *                 on the main thread.
      */
-    PhluxBackgroundCancellable execute(PhluxBackgroundCallback<S> callback);
+    Cancellable execute(BackgroundCallback<S> callback);
 }

@@ -6,14 +6,14 @@ import android.view.View;
 /**
  * This is the recommended interface for phlux enabled views.
  */
-public interface PhluxView<S extends PhluxState> {
+public interface PhluxView<S extends ViewState> {
 
     interface FieldUpdater<T> {
         void call(T value);
     }
 
     S state();
-    PhluxScope<S> scope();
+    Scope<S> scope();
 
     /**
      * Incorporates updating logic for a visual part of an activity,
@@ -38,7 +38,7 @@ public interface PhluxView<S extends PhluxState> {
      * onScopeCreated is called when scope and state was created for the first time.
      * This is a good place to initialize background tasks.
      */
-    void onScopeCreated(PhluxScope<S> scope);
+    void onScopeCreated(Scope<S> scope);
 
     /**
      * Creates an initial state.

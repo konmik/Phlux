@@ -1,10 +1,10 @@
 package example;
 
 import auto.parcel.AutoParcel;
-import phlux.PhluxState;
+import phlux.ViewState;
 
 @AutoParcel
-public abstract class DemoState implements PhluxState {
+public abstract class DemoState implements ViewState {
 
     public abstract float progress();
 

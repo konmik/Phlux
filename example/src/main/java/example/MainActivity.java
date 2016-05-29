@@ -9,7 +9,7 @@ import android.widget.Toast;
 
 import base.ServerAPI;
 import info.android15.phlux.example.R;
-import phlux.PhluxScope;
+import phlux.Scope;
 import phlux.base.PhluxActivity;
 
 public class MainActivity extends PhluxActivity<MainState> {
@@ -41,7 +41,7 @@ public class MainActivity extends PhluxActivity<MainState> {
     }
 
     @Override
-    public void onScopeCreated(PhluxScope<MainState> scope) {
+    public void onScopeCreated(Scope<MainState> scope) {
         super.onScopeCreated(scope);
         scope.background(REQUEST_ID, Request.create(MainState.DEFAULT_NAME));
     }

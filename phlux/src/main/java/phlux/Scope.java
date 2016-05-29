@@ -7,10 +7,10 @@ import java.util.UUID;
 /**
  * Represents an easy and type-safe access to {@link Phlux}.
  * <p>
- * {@link PhluxScope} is an interface to access internal state of a View,
+ * {@link Scope} is an interface to access internal state of a View,
  * including its background tasks and callbacks.
  */
-public class PhluxScope<S extends PhluxState> {
+public class Scope<S extends ViewState> {
 
     private final String key;
     private final Phlux phlux = Phlux.INSTANCE;
@@ -18,7 +18,7 @@ public class PhluxScope<S extends PhluxState> {
     /**
      * Constructs a new scope from a given initial state.
      */
-    public PhluxScope(S state) {
+    public Scope(S state) {
         this.key = UUID.randomUUID().toString();
         phlux.create(key, state);
     }
@@ -26,7 +26,7 @@ public class PhluxScope<S extends PhluxState> {
     /**
      * Restores a scope from a given {@link Bundle}.
      */
-    public PhluxScope(Bundle bundle) {
+    public Scope(Bundle bundle) {
         this.key = bundle.getString("key");
         phlux.restore(key, bundle.getParcelable("scope"));
     }
@@ -51,7 +51,7 @@ public class PhluxScope<S extends PhluxState> {
     /**
      * Applies a function to the scope's state.
      */
-    public PhluxApplyResult<S> apply(PhluxFunction<S> function) {
+    public ApplyResult<S> apply(Function<S> function) {
         return phlux.apply(key, function);
     }
 
@@ -61,7 +61,7 @@ public class PhluxScope<S extends PhluxState> {
      * Sticky means that the request will not be removed after it's execution and will be re-executed
      * on a process termination.
      */
-    public void background(int id, PhluxBackground<S> background) {
+    public void background(int id, Background<S> background) {
         phlux.background(key, id, background);
     }
 
@@ -85,14 +85,14 @@ public class PhluxScope<S extends PhluxState> {
      * Registers a callback for state updates.
      * Once registered the callback will be fired immediately.
      */
-    public void register(PhluxStateCallback<S> callback) {
+    public void register(StateCallback<S> callback) {
         phlux.register(key, callback);
     }
 
     /**
      * Unregisters a given state callback.
      */
-    public void unregister(PhluxStateCallback<S> callback) {
+    public void unregister(StateCallback<S> callback) {
         phlux.unregister(key, callback);
     }
 }

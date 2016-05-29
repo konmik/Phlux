@@ -8,14 +8,14 @@ import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
 
-import phlux.PhluxScope;
-import phlux.PhluxState;
+import phlux.Scope;
+import phlux.ViewState;
 import phlux.PhluxViewAdapter;
 
 /**
  * This is an *example* of how to adapt Phlux to Views.
  */
-public abstract class PhluxView<S extends PhluxState> extends FrameLayout implements phlux.PhluxView<S> {
+public abstract class PhluxView<S extends ViewState> extends FrameLayout implements phlux.PhluxView<S> {
 
     private static final String PHLUX_SCOPE = "phlux_scope";
     private static final String SUPER = "super";
@@ -77,7 +77,7 @@ public abstract class PhluxView<S extends PhluxState> extends FrameLayout implem
     }
 
     @Override
-    public PhluxScope<S> scope() {
+    public Scope<S> scope() {
         return adapter.scope();
     }
 
@@ -97,6 +97,6 @@ public abstract class PhluxView<S extends PhluxState> extends FrameLayout implem
     }
 
     @Override
-    public void onScopeCreated(PhluxScope<S> scope) {
+    public void onScopeCreated(Scope<S> scope) {
     }
 }

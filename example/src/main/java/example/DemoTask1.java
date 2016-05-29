@@ -3,19 +3,19 @@ package example;
 import android.os.AsyncTask;
 
 import auto.parcel.AutoParcel;
-import phlux.PhluxBackground;
-import phlux.PhluxBackgroundCallback;
-import phlux.PhluxBackgroundCancellable;
+import phlux.Background;
+import phlux.BackgroundCallback;
+import phlux.Cancellable;
 
 @AutoParcel
-public abstract class DemoTask1 implements PhluxBackground<DemoState> {
+public abstract class DemoTask1 implements Background<DemoState> {
 
     public static DemoTask1 create() {
         return new AutoParcel_DemoTask1();
     }
 
     @Override
-    public PhluxBackgroundCancellable execute(PhluxBackgroundCallback<DemoState> callback) {
+    public Cancellable execute(BackgroundCallback<DemoState> callback) {
         AsyncTask<Void, Float, Void> task = new AsyncTask<Void, Float, Void>() {
             @Override
             protected Void doInBackground(Void... params) {

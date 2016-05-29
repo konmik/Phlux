@@ -5,15 +5,15 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.View;
 
-import phlux.PhluxScope;
-import phlux.PhluxState;
+import phlux.Scope;
+import phlux.ViewState;
 import phlux.PhluxView;
 import phlux.PhluxViewAdapter;
 
 /**
  * This is an *example* of how to adapt Phlux to Activities.
  */
-public abstract class PhluxFragment<S extends PhluxState> extends Fragment implements PhluxView<S> {
+public abstract class PhluxFragment<S extends ViewState> extends Fragment implements PhluxView<S> {
 
     private static final String PHLUX_SCOPE = "phlux_scope";
 
@@ -33,7 +33,7 @@ public abstract class PhluxFragment<S extends PhluxState> extends Fragment imple
     }
 
     @Override
-    public PhluxScope<S> scope() {
+    public Scope<S> scope() {
         return adapter.scope();
     }
 
@@ -43,7 +43,7 @@ public abstract class PhluxFragment<S extends PhluxState> extends Fragment imple
     }
 
     @Override
-    public void onScopeCreated(PhluxScope<S> scope) {
+    public void onScopeCreated(Scope<S> scope) {
     }
 
     @Override
