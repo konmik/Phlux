@@ -47,13 +47,13 @@ Forget about memory leaks and lost data.
 If you *really* need a dispatcher it can be easily implemented on top of Phlux.
 
 2. Unlike Flux, we don't have React library for our views.
-Creating and supporting a such library requires a great amount of time investment.
-Phlux does not require such library.
+Creating and supporting such a library requires a great amount of time investment.
+Phlux does not require such a library.
 
 3. We can *update* views instead of re-creating them. Sure, this is not as
 "functional" as some of us want, but it is a good compromise. Android XML tools
 are quite good and I personally don't want to lose them.
-Phlux allows to use the current workflow and it does not require to hardcode all views.
+Phlux allows to use the current workflow and it does not require us to hardcode all views.
 
 Phlux is Android-friendly, it allows to call `view.update(viewState)`
 at the end of all.
@@ -70,7 +70,7 @@ While Phlux has little amount of boxes and arrows, it still has some. It is nice
 ![Data Flow](https://raw.githubusercontent.com/konmik/Phlux/resources/doc/data_flow.png)
 
 This schema represents the Phlux data flow. Whenever an action occurs (be it a background task
-completion or an UI event) it applies to *State* and then *View* should automatically
+completion or a UI event) it applies to *State* and then *View* should automatically
 be updated from the new *State* instance.
 
 When the application needs to update a view it should ask Phlux to `apply()` a function to the corresponding state.
@@ -82,8 +82,8 @@ so you can always rely on it.
 
 "It is better to have 100 functions operate on one data structure than 10 functions on 10 data structures." — Alan Perlis
 
-So now we have this one data structure and our function number does not increase so dramatically, we have even lesser
-amount of functions than we normally have. The interesting effect is that all of our functions now have a clear purpose -
+So now we have this one data structure and our function number does not increase so dramatically, we have even fewer
+functions than we normally have. The interesting effect is that all of our functions now have a clear purpose -
 they either alter the data structure OR update a specific part of the view.
 
 Normally on Android our views are bloated with
